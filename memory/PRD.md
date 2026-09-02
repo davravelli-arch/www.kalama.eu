@@ -30,8 +30,17 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 
 ## Backlog prioritizzato
 - P1: Verifica da parte del titolare che le email arrivino davvero nella casella info@kalama.eu (inviare un form di test e controllare)
-- P1: Il titolare valida prezzi/piatti del menu reale (fonte pubblica TheFork 2026)
 - P2: Link diretto Glovo Málaga (ora punta alla home Glovo Málaga, listing diretto non trovato pubblicamente)
-- P2: Foto reali anche per Sliema/food truck (ora immagini stock)
+- P2: Il titolare carica dal pannello /admin → Foto del sito le foto reali per Chi Siamo, sede Málaga, sede Sliema, food truck (ora fallback foto Kalamà da myguide)
+- P2: Il titolare carica dal pannello /admin → Menu le foto dei piatti mancanti (ora placeholder con logo)
 - P2: Modifica orari/sedi anche dal pannello admin (ora solo menu)
 - P3: SEO multilingua (hreflang, meta per lingua), sitemap
+
+## Aggiornamento 02/06/2026 — Menù reali per sede, logo ufficiale, upload foto
+- Menu riseedato da PDF/immagine ufficiali forniti dal titolare: 105 voci (Málaga 61 in italiano, Malta/Sliema 44 in inglese) con campo `location`, `price_max` per calice/bottiglia, categorie cucina/pasta/fritti/grill/insalate/panini/dolci/salse/bevande/birre/vini/cocktail/caffe. Seed versionato con `MENU_VERSION` in `/app/backend/menu_data.py` (cambiare versione = reseed completo, attenzione: cancella modifiche admin).
+- Sezione Menu: selettore Málaga / Malta, filtri dinamici per sede, bevande in liste compatte, piatti senza foto mostrano placeholder con logo (foto stock Unsplash rimosse su richiesta: "le foto sono tutte sbagliate").
+- Logo ufficiale estratto dal PDF vettoriale in SVG: `/frontend/public/brand/logo-dark.svg`, `logo-yellow.svg`, `mark-dark.svg`, `mark-yellow.svg`, favicon. Colori esatti: giallo #FCC617, nero #1D1D1B; accento blu #2F6F9F (scelta utente), CTA ambra #F5A800.
+- Upload foto (Emergent Object Storage): `POST /api/admin/upload` → `/api/files/{path}` pubblico con cache; pannello admin con tab "Menu" (foto per piatto, sede, 2° prezzo) e "Foto del sito" (hero, chi siamo, sedi, food truck, galleria). Collection `site_images`, `files`. Frontend ridimensiona lato client a max 1600px prima dell'upload.
+- Foto reali già caricate dal cliente: cono di calamari fritti (hero + Calamari fritti grandi in entrambe le sedi + galleria), calamari e gamberi alla griglia (spiedini calamari e gamberi + galleria).
+- Test: iteration_2 → 28 test backend + E2E frontend tutti verdi (/app/test_reports/iteration_2.json).
+- Nota: il video CCTV caricato (2024-08-25-15-43-14.mp4) non è stato usato, sembra un upload accidentale.

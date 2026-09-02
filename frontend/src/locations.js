@@ -33,7 +33,7 @@ export const locations = [
     hours_en: "Every day · 12:00 – 23:00",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=111+Triq+ix-Xatt+Sliema+Malta",
     whatsapp: "35679900819",
-    image: "https://images.unsplash.com/photo-1763703396043-cc821fcc4bc2?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-2-7495722.jpg",
     actions: [
       { id: "bolt", label: "Bolt Food", kind: "order", url: "https://food.bolt.eu/en/324-valletta/p/80230-kalama-the-real-fish-street-food-crab-go/" },
     ],
@@ -42,7 +42,7 @@ export const locations = [
 
 export const foodTruck = {
   where: "Qawra & Buġibba · Malta",
-  image: "https://images.unsplash.com/photo-1579208030886-b937da0925dc?q=80&w=800&auto=format&fit=crop",
+  image: "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-4-7495724.jpg",
 };
 
 export const socials = {

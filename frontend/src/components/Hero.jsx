@@ -1,9 +1,12 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Phone, ArrowDown } from "lucide-react";
+import { imgUrl } from "../lib/img";
 
 const EASE = [0.22, 1, 0.36, 1];
 
-export const Hero = ({ t }) => {
+const DEFAULT_IMG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-1-7495721.jpg";
+
+export const Hero = ({ t, image }) => {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 900], [0, 180]);
   const colors = ["text-cream", "text-coral", "text-lemon"];
@@ -12,8 +15,9 @@ export const Hero = ({ t }) => {
     <section id="top" data-testid="hero-section" className="relative min-h-[100svh] flex items-end overflow-hidden">
       <motion.img
         style={{ y }}
-        src="https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-1-7495721.jpg"
-        alt="Kalamà panino al polpo"
+        src={imgUrl(image) || DEFAULT_IMG}
+        data-testid="hero-image"
+        alt="Kalamà calamari fritti"
         className="absolute inset-0 w-full h-[115%] object-cover"
       />
       <div className="absolute inset-0 bg-ink/55" />
@@ -63,7 +67,7 @@ export const Hero = ({ t }) => {
           <a
             href="#sedi"
             data-testid="hero-call-cta"
-            className="inline-flex items-center gap-2 bg-coral text-white border-2 border-ink rounded-full px-8 py-4 font-bold uppercase tracking-wide shadow-hard btn-lift"
+            className="inline-flex items-center gap-2 bg-coral text-ink border-2 border-ink rounded-full px-8 py-4 font-bold uppercase tracking-wide shadow-hard btn-lift"
           >
             <Phone className="w-5 h-5" />
             {t.hero.ctaCall}

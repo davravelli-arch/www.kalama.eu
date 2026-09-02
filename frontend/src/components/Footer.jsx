@@ -1,15 +1,14 @@
-import { Fish, Instagram, Facebook, Phone } from "lucide-react";
+import { Instagram, Facebook, Phone } from "lucide-react";
 import { socials, locations } from "../locations";
+import { Logo } from "./Logo";
 
 export const Footer = ({ t }) => {
   return (
     <footer data-testid="main-footer" className="bg-ink border-t-2 border-ink pt-16 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-8 pb-12">
-          <div className="flex items-center gap-3">
-            <span className="bg-coral border-2 border-cream rounded-full p-2">
-              <Fish className="w-6 h-6 text-white" strokeWidth={2.5} />
-            </span>
+          <div className="flex flex-wrap items-center gap-5">
+            <Logo variant="yellow" className="h-12" testId="footer-logo-img" />
             <span className="text-cream font-bold uppercase tracking-widest text-sm max-w-xs">{t.footer.tagline}</span>
           </div>
           <div className="flex flex-wrap items-center gap-6">

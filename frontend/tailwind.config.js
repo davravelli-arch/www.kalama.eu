@@ -8,11 +8,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        cream: '#FAF9F6',
-        ink: '#0A192F',
-        coral: '#FF6B6B',
-        ocean: '#0055FF',
-        lemon: '#FFD166',
+        cream: '#FAF7F0',
+        ink: '#1D1D1B',
+        coral: '#F5A800',
+        ocean: '#2F6F9F',
+        lemon: '#FCC617',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

@@ -2,8 +2,9 @@ import { motion } from "framer-motion";
 import { MapPin, Phone, Clock, Mail, Navigation, Truck } from "lucide-react";
 import { KineticLines } from "./Kinetic";
 import { locations, foodTruck } from "../locations";
+import { imgUrl } from "../lib/img";
 
-export const Locations = ({ t, lang }) => {
+export const Locations = ({ t, lang, images = {} }) => {
   return (
     <section id="sedi" data-testid="locations-section" className="py-24 sm:py-32 bg-cream overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
@@ -27,14 +28,15 @@ export const Locations = ({ t, lang }) => {
             >
               <div className="relative h-72 overflow-hidden border-b-2 border-ink">
                 <img
-                  src={loc.image}
+                  src={imgUrl(images[`location-${loc.id}`]) || loc.image}
+                  data-testid={`location-image-${loc.id}`}
                   alt={loc.name}
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <span
                   className="absolute top-4 left-5 font-display text-7xl text-lemon select-none"
-                  style={{ textShadow: "4px 4px 0 #0A192F" }}
+                  style={{ textShadow: "4px 4px 0 #1D1D1B" }}
                 >
                   {loc.num}
                 </span>
@@ -68,7 +70,7 @@ export const Locations = ({ t, lang }) => {
                   <a
                     href={loc.phoneHref}
                     data-testid={`location-call-${loc.id}`}
-                    className="inline-flex items-center gap-2 bg-coral text-white border-2 border-ink rounded-full px-5 py-2.5 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
+                    className="inline-flex items-center gap-2 bg-coral text-ink border-2 border-ink rounded-full px-5 py-2.5 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
                   >
                     <Phone className="w-4 h-4" />
                     {t.locations.call}
@@ -110,7 +112,7 @@ export const Locations = ({ t, lang }) => {
           className="mt-10 bg-lemon border-2 border-ink rounded-3xl shadow-hard p-8 flex flex-col md:flex-row items-center gap-8"
         >
           <div className="border-2 border-ink rounded-2xl overflow-hidden shadow-hard-sm rotate-2 shrink-0">
-            <img src={foodTruck.image} alt="Kalamà Food Truck" loading="lazy" className="w-full md:w-56 h-40 object-cover" />
+            <img src={imgUrl(images.foodtruck) || foodTruck.image} data-testid="foodtruck-image" alt="Kalamà Food Truck" loading="lazy" className="w-full md:w-56 h-40 object-cover" />
           </div>
           <div className="flex-1 text-center md:text-left">
             <span className="inline-block bg-ink text-lemon rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest">
@@ -122,7 +124,7 @@ export const Locations = ({ t, lang }) => {
             <p className="text-ink/80 font-medium mt-2">{t.locations.truckText}</p>
           </div>
           <span className="bg-coral border-2 border-ink rounded-full p-5 shrink-0 animate-float">
-            <Truck className="w-10 h-10 text-white" strokeWidth={2} />
+            <Truck className="w-10 h-10 text-ink" strokeWidth={2} />
           </span>
         </motion.div>
       </div>

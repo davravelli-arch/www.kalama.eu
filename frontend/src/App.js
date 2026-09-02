@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
+import axios from "axios";
 import { Toaster } from "sonner";
 import "@/App.css";
 import { translations } from "@/i18n";
@@ -19,11 +20,19 @@ import Admin from "@/components/Admin";
 
 function Landing() {
   const [lang, setLang] = useState("it");
+  const [images, setImages] = useState({});
   const t = translations[lang];
 
   useEffect(() => {
     const lenis = new Lenis({ autoRaf: true });
     return () => lenis.destroy();
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_BACKEND_URL}/api/site-images`)
+      .then((res) => setImages(res.data))
+      .catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
@@ -34,12 +43,12 @@ function Landing() {
     <div className="App font-body bg-cream text-ink">
       <Navbar t={t} lang={lang} setLang={setLang} />
       <main>
-        <Hero t={t} />
+        <Hero t={t} image={images.hero} />
         <Ticker t={t} />
-        <About t={t} />
+        <About t={t} image={images.about} />
         <MenuSection t={t} lang={lang} />
-        <Locations t={t} lang={lang} />
-        <Gallery t={t} />
+        <Locations t={t} lang={lang} images={images} />
+        <Gallery t={t} images={images.gallery} />
         <Franchising t={t} />
         <Contact t={t} />
       </main>

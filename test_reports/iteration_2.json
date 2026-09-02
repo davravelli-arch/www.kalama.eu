@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 2 E2E test of Kalamà after the 105-item per-location menu reseed + Emergent Object Storage upload feature. Backend: 28 pytest tests, 28 passed (100%) — GET /api/menu returns exactly 105 seeded items (61 malaga / 44 malta), all with location in {malaga,malta}, wine price_max numeric (malaga-chardonnay-cavit 4.5/22.0, malta-chardonnay-casalforte 5.0/22.0), empty image='' accepted, malta correctly has no pasta/insalate/salse/cocktail categories; admin login/JWT (401 no token, 401 bad token, 401 wrong password); admin menu CRUD with a malta/birre/price_max=null item verified on the public menu, 409 duplicate, 404 update/delete missing, 422 invalid; POST /api/admin/upload returns /api/files/kalama/uploads/<uuid>.png|jpg and GET of that URL serves 200 image/png bytes (401 without token, 415 for text/plain, 404 for unknown path); GET /api/site-images returns hero string + gallery array, PUT about works and reflects in GET, invalid key 404, gallery-with-string 422, hero-with-list 422, PUT without token 401. All state restored (gallery back to the 2 original client photos, about='', hero untouched, no test menu items left; verified via API afterwards). Frontend (Playwright, 1920x1080): nav logo img src=/brand/logo-dark.svg, footer logo /brand/logo-yellow.svg, hero-image src=/api/files/... (naturalWidth 1333, loads); menu default Málaga with note 'Carta Kalamà Málaga 2025 · Prezzi in euro' and all 13 filters + Tutto; switching to Malta changes note to 'Carta Kalamà Sliema 2025', hides pasta/insalate/salse/cocktail and resets filter to 'Tutto'; drinks rendered as compact lists in menu-drinks with double price '€5.00 / €22.00' on menu-price-malta-chardonnay-casalforte; no broken images anywhere (dishes without photo show the yellow logo placeholder); h2 'SCEGLI LA TUA ONDA' visible after scroll (Lenis); EN switch renders 'From the Kitchen'/'From the Fryer' and note 'Kalamà Málaga menu 2025 · Prices in euros'. Admin /admin: login OK, admin-tabs + admin-tab-photos, location tabs with per-location category sections (13 malaga / 9 malta), create item test-e2e-birra (malta/birre) with image upload via admin-item-image-input → preview src /api/files/..., admin-input-image populated, toast 'Foto caricata', item listed, edited to €4.20, deleted (confirm) → gone. Site photos tab shows all 5 cards + gallery of 2; adding a PNG via admin-gallery-add-input → 3 items, removing index 2 → back to the 2 original photos. WhatsApp float now correct for both sites (wa.me/34610755695 and wa.me/35679900819 — the iteration-1 wa.me/undefined bug is fixed). Zero console/page errors on public site and admin.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/files/{path}", "issue": "Backend correctly sets 'Cache-Control: public, max-age=31536000, immutable' (verified on 127.0.0.1:8001), but the preview ingress/CDN rewrites it to 'no-store, no-cache, must-revalidate' on the public URL. Environment behaviour, no code change needed; test assertion relaxed accordingly."},
+      {"endpoint": "POST /api/admin/upload", "issue": "Content-type is trusted from the multipart header only — no magic-byte validation, so a non-image payload sent as image/png is stored and later served as image/png. Low risk for a single-admin panel; consider sniffing headers (PNG/JPEG/WebP signature)."},
+      {"endpoint": "POST /api/admin/login", "issue": "Pre-existing (iteration 1): lockout counter is refreshed on every wrong attempt so an expired-window IP can be re-locked by one wrong attempt. Not retested beyond the single wrong-password test."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Admin · Foto del sito", "issues": ["'CAMBIA FOTO' buttons are ocean-blue on white with white text — readable, but inconsistent with the yellow/black primary CTA style used elsewhere in the panel (cosmetic only)"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "admin_upload validates only the client-supplied content-type; adding a magic-byte check (and stripping EXIF/limiting dimensions) would harden the upload path.",
+    "GET /api/files does a Mongo lookup + full object fetch into memory on every request with no in-process cache; combined with the ingress stripping Cache-Control this means every page view re-downloads hero/gallery images from object storage. Consider a redirect to a signed storage URL or a small LRU cache.",
+    "seed_menu() deletes and re-inserts the whole menu_items collection whenever MENU_VERSION changes — any admin-created/edited item is silently lost on the next version bump. Worth documenting or merging instead of wiping."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (28/28)", "frontend": "100% of tested flows"},
+  "seed_data_creation": "Temporary only, all cleaned up: menu items test-e2e-birra-qa (backend) and test-e2e-birra (UI) created then deleted; TEST_QA contact + franchising submissions (1 each, real email notification); a few 1x1 PNG/JPG test uploads remain as orphan objects in Emergent Object Storage / db.files (unreferenced, harmless). site-images restored: gallery = original 2 client photos, about = '', hero untouched.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Admin password KalamaMare2026! at /admin (from /app/memory/test_credentials.md)",
+  "context_for_next_testing_agent": "Regression suite: /app/backend/tests/backend_test.py (run: cd /app/backend && python -m pytest tests/backend_test.py -q). It contains exactly ONE wrong-password login attempt (followed by a correct login which clears the lockout) — do not add more or you will trip the 5-attempt IP lockout. All site-images tests read the current value, mutate, then restore, so the 2 real gallery photos and the hero are always preserved. Public URL from /app/frontend/.env. No open defects found in this iteration.",
+  "rca_of_the_issue": "N/A — no functional defects found. Only env-level Cache-Control rewriting by the preview ingress (not an app bug)."
+}

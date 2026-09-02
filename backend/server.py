@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, UploadFile, File
+from fastapi.responses import Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,8 +13,9 @@ from html.parser import HTMLParser
 from urllib.parse import urlparse
 from pathlib import Path
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 import uuid
+from menu_data import MENU_SEED, MENU_VERSION
 import hmac
 import jwt
 from datetime import datetime, timezone, timedelta
@@ -35,45 +37,6 @@ EMAIL_KEY = os.environ.get("EMERGENT_EMAIL_KEY")
 EMAIL_FROM_NAME = os.environ["EMAIL_FROM_NAME"]
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL")
-
-U = "https://images.unsplash.com/"
-TF = "https://cdn.thefork.com/tf-lab/image/upload/w_640,c_fill,q_auto,f_auto/restaurant/8d038508-d588-47fb-a095-fd0e9d912f32/"
-MG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/"
-
-
-def u(photo_id):
-    return f"{U}{photo_id}?q=80&w=800&auto=format&fit=crop"
-
-
-MENU_SEED = [
-    {"id": "melanzane", "category": "cucina", "name_it": "Melanzane alla Parmigiana", "name_en": "Eggplant Parmigiana", "desc_it": "Melanzane, salsa di pomodoro, basilico, mozzarella, provola e parmigiano.", "desc_en": "Aubergine, tomato sauce, basil, mozzarella, provola and parmesan.", "price": 12.0, "tag_it": "", "tag_en": "", "image": u("photo-1534080564583-6be75777b70a")},
-    {"id": "polpo-luciana", "category": "cucina", "name_it": "Polpo alla Luciana", "name_en": "Octopus Luciana Style", "desc_it": "Polpo, vino bianco, pomodorini, olive, capperi e prezzemolo su letto di patate saltate.", "desc_en": "Octopus, white wine, cherry tomatoes, olives, capers and parsley over sautéed potatoes.", "price": 18.0, "tag_it": "", "tag_en": "", "image": u("photo-1467003909585-2f8a72700288")},
-    {"id": "scialatielli", "category": "pasta", "name_it": "Scialatielli Puttanesca e Pesce", "name_en": "Scialatielli Puttanesca & Fresh Fish", "desc_it": "Pasta fatta in casa, pesce fresco, pomodorini, olive, capperi, prezzemolo e aglio.", "desc_en": "Homemade pasta, fresh fish, cherry tomatoes, olives, capers, parsley and garlic.", "price": 15.0, "tag_it": "", "tag_en": "", "image": u("photo-1473093295043-cdd812d0e601")},
-    {"id": "orecchiette", "category": "pasta", "name_it": "Orecchiette Broccoli e Alici", "name_en": "Orecchiette with Broccoli & Anchovies", "desc_it": "Pasta fresca, broccoli, alici sott'olio, aglio, prezzemolo, olio EVO.", "desc_en": "Fresh pasta, broccoli, anchovies in oil, garlic, parsley, EVO oil.", "price": 14.5, "tag_it": "", "tag_en": "", "image": u("photo-1551183053-bf91a1d81141")},
-    {"id": "strozzapreti", "category": "pasta", "name_it": "Strozzapreti Gamberi e Zucchine", "name_en": "Strozzapreti with Prawns & Zucchini", "desc_it": "Pasta fresca con gamberi e zucchine.", "desc_en": "Fresh pasta with prawns and zucchini.", "price": 16.0, "tag_it": "", "tag_en": "", "image": u("photo-1621996346565-e3dbc646d9a9")},
-    {"id": "calamari-piccolo", "category": "fritti", "name_it": "Calamari Fritti Piccolo (150g)", "name_en": "Fried Calamari Small (150g)", "desc_it": "Anelli di calamaro freschissimo in pastella leggera.", "desc_en": "Super-fresh squid rings in a light batter.", "price": 11.0, "tag_it": "", "tag_en": "", "image": MG + "kalama-malaga-seafood-bar-2-7495722.jpg"},
-    {"id": "calamari-grande", "category": "fritti", "name_it": "Calamari Fritti Grande (250g)", "name_en": "Fried Calamari Large (250g)", "desc_it": "La porzione grande per i veri affamati.", "desc_en": "The large portion for the truly hungry.", "price": 14.0, "tag_it": "", "tag_en": "", "image": TF + "4a45016f-eeb4-4c62-b24d-7ee8ecfc46b8.png"},
-    {"id": "calamari-zucchine", "category": "fritti", "name_it": "Calamari e Zucchine", "name_en": "Calamari & Zucchini", "desc_it": "Calamari fritti con zucchine croccanti.", "desc_en": "Fried calamari with crispy zucchini.", "price": 14.0, "tag_it": "", "tag_en": "", "image": TF + "5b6ddc1e-6ea8-4a24-9283-bc18ccc9ce0c.png"},
-    {"id": "calamari-gamberi", "category": "fritti", "name_it": "Calamari Fritti e Gamberi", "name_en": "Fried Calamari & Prawns", "desc_it": "Il fritto perfetto per i più golosi.", "desc_en": "The perfect fry for the greediest.", "price": 16.0, "tag_it": "", "tag_en": "", "image": u("photo-1559847844-5315695dadae")},
-    {"id": "gamberi-fritti", "category": "fritti", "name_it": "Gamberi Fritti (8 pz)", "name_en": "Fried Prawns (8 pcs)", "desc_it": "Otto gamberi dorati e croccanti.", "desc_en": "Eight golden, crispy prawns.", "price": 18.0, "tag_it": "", "tag_en": "", "image": TF + "ec864289-8335-49ea-ad30-157c7f207b5e.png"},
-    {"id": "gran-fritto", "category": "fritti", "name_it": "Gran Fritto Misto", "name_en": "Grand Mixed Fry", "desc_it": "Calamari, zucchine, gamberi, baccalà, neonata, polpo e rosada.", "desc_en": "Calamari, zucchini, prawns, cod, neonata, octopus and rosada.", "price": 32.0, "tag_it": "Da condividere", "tag_en": "To share", "image": TF + "b0bd03e5-a835-4645-85c3-1ec8c5ec9058.png"},
-    {"id": "crocchette", "category": "fritti", "name_it": "Crocchette di Baccalà (5 pz)", "name_en": "Cod Croquettes (5 pcs)", "desc_it": "Crocchette dorate di baccalà e patate.", "desc_en": "Golden cod and potato croquettes.", "price": 10.0, "tag_it": "", "tag_en": "", "image": TF + "747086b1-0a2c-4b72-99f6-970f01b4b9a0.png"},
-    {"id": "fish-chips", "category": "fritti", "name_it": "Fish & Chips (Baccalà)", "name_en": "Fish & Chips (Cod)", "desc_it": "Baccalà in pastella con patatine fritte.", "desc_en": "Battered cod with fries.", "price": 14.0, "tag_it": "", "tag_en": "", "image": u("photo-1579208030886-b937da0925dc")},
-    {"id": "pinchos-calamari", "category": "grill", "name_it": "Spiedini di Calamari (3 pz)", "name_en": "Calamari Skewers (3 pcs)", "desc_it": "Tre spiedini di calamari alla griglia.", "desc_en": "Three grilled calamari skewers.", "price": 13.0, "tag_it": "", "tag_en": "", "image": u("photo-1559742811-822873691df8")},
-    {"id": "rosada", "category": "grill", "name_it": "Rosada alla Griglia", "name_en": "Grilled Rosada", "desc_it": "Con patatine fritte e insalata.", "desc_en": "With fries and salad.", "price": 18.0, "tag_it": "", "tag_en": "", "image": u("photo-1615141982883-c7ad0e69fd62")},
-    {"id": "salmone", "category": "grill", "name_it": "Salmone alla Griglia", "name_en": "Grilled Salmon", "desc_it": "Con patatine fritte e insalata.", "desc_en": "With fries and salad.", "price": 18.0, "tag_it": "", "tag_en": "", "image": MG + "kalama-malaga-seafood-bar-4-7495724.jpg"},
-    {"id": "insalata-mista", "category": "insalate", "name_it": "Insalata Mista", "name_en": "Mixed Salad", "desc_it": "Insalata verde, pomodorini, rucola, olive verdi, cipolla rossa.", "desc_en": "Green salad, cherry tomatoes, arugula, green olives, red onion.", "price": 5.0, "tag_it": "", "tag_en": "", "image": u("photo-1625944230945-1b7dd3b949ab")},
-    {"id": "insalata-russa", "category": "insalate", "name_it": "Insalata Russa all'Italiana", "name_en": "Italian-Style Russian Salad", "desc_it": "Gamberetti, gamberi, tonno, cetrioli e piselli.", "desc_en": "Shrimps, prawns, tuna, cucumbers and peas.", "price": 12.0, "tag_it": "", "tag_en": "", "image": TF + "0baa8f03-0cc8-4296-9776-05381fcb6e62.png"},
-    {"id": "insalata-catalana", "category": "insalate", "name_it": "Insalata Catalana", "name_en": "Catalan Salad", "desc_it": "Polpo tenero, gamberi, calamari, pomodorini, cipolla rossa, patate, basilico, sedano, carota, olio EVO e limone.", "desc_en": "Tender octopus, prawns, calamari, cherry tomatoes, red onion, potatoes, basil, celery, carrot, EVO oil and lemon.", "price": 18.0, "tag_it": "", "tag_en": "", "image": u("photo-1546069901-ba9599a7e63c")},
-    {"id": "insalata-polpo", "category": "insalate", "name_it": "Insalata di Polpo", "name_en": "Octopus Salad", "desc_it": "Polpo tenero bollito, patate, prezzemolo, aglio, pomodori secchi, sedano, citronette.", "desc_en": "Tender boiled octopus, potatoes, parsley, garlic, sun-dried tomatoes, celery, citronette.", "price": 16.0, "tag_it": "", "tag_en": "", "image": u("photo-1565680018434-b513d5e5fd47")},
-    {"id": "comino", "category": "panini", "name_it": "Comino Sandwich", "name_en": "Comino Sandwich", "desc_it": "Tonno fresco alla griglia, peperoni arrosto, pomodorini caramellati, rucola, salsa della casa.", "desc_en": "Grilled fresh tuna, roasted peppers, caramelised cherry tomatoes, arugula, house sauce.", "price": 15.0, "tag_it": "", "tag_en": "", "image": TF + "da7c05ce-7bd0-4b49-b8b3-572178668d08.png"},
-    {"id": "gozo", "category": "panini", "name_it": "Gozo Sandwich", "name_en": "Gozo Sandwich", "desc_it": "Polpo tenero alla griglia, pomodori secchi, stracciatella, rucola, salsa della casa.", "desc_en": "Grilled tender octopus, sun-dried tomatoes, stracciatella, arugula, house sauce.", "price": 15.0, "tag_it": "Più amato", "tag_en": "Best seller", "image": MG + "kalama-malaga-seafood-bar-1-7495721.jpg"},
-    {"id": "capri", "category": "panini", "name_it": "Capri Sandwich", "name_en": "Capri Sandwich", "desc_it": "Calamari alla griglia, melanzane grigliate, philadelphia, hummus, insalata.", "desc_en": "Grilled calamari, grilled aubergine, philadelphia, hummus, salad.", "price": 15.0, "tag_it": "", "tag_en": "", "image": TF + "8f4295b4-bd0a-4795-9fe1-0ce99150127e.png"},
-    {"id": "tiramisu", "category": "dolci", "name_it": "Tiramisù Classico", "name_en": "Classic Tiramisù", "desc_it": "Il dolce italiano per eccellenza.", "desc_en": "The quintessential Italian dessert.", "price": 5.0, "tag_it": "", "tag_en": "", "image": u("photo-1571877227200-a0d98ea607e9")},
-    {"id": "spritz", "category": "dolci", "name_it": "Spritz", "name_en": "Spritz", "desc_it": "L'aperitivo che profuma d'estate.", "desc_en": "The aperitif that tastes like summer.", "price": 7.0, "tag_it": "", "tag_en": "", "image": u("photo-1514362545857-3bc16c4c7d1b")},
-    {"id": "mojito", "category": "dolci", "name_it": "Mojito", "name_en": "Mojito", "desc_it": "Menta, lime e soda: freschezza cubana.", "desc_en": "Mint, lime and soda: Cuban freshness.", "price": 7.0, "tag_it": "", "tag_en": "", "image": u("photo-1551538827-9c037cb4f32a")},
-]
-
 
 class ContactMessage(BaseModel):
     name: str
@@ -244,12 +207,14 @@ class AdminLogin(BaseModel):
 
 class MenuItem(BaseModel):
     id: str
+    location: str = "malaga"
     category: str
     name_it: str
     name_en: str
     desc_it: str = ""
     desc_en: str = ""
     price: float
+    price_max: Optional[float] = None
     tag_it: str = ""
     tag_en: str = ""
     image: str = ""
@@ -335,8 +300,120 @@ async def admin_delete_menu(item_id: str, request: Request):
 
 @app.on_event("startup")
 async def seed_menu():
-    if await db.menu_items.count_documents({}) == 0:
-        await db.menu_items.insert_many(MENU_SEED)
+    meta = await db.meta.find_one({"_id": "menu_version"})
+    if await db.menu_items.count_documents({}) == 0 or not meta or meta.get("version") != MENU_VERSION:
+        await db.menu_items.delete_many({})
+        await db.menu_items.insert_many([dict(i) for i in MENU_SEED])
+        await db.meta.update_one({"_id": "menu_version"}, {"$set": {"version": MENU_VERSION}}, upsert=True)
+    try:
+        await init_storage()
+    except Exception as e:
+        logger.error(f"Storage init failed: {e}")
+
+
+# --- Object storage (Emergent managed) & site images ---
+STORAGE_BASE = (os.environ.get("INTEGRATION_PROXY_URL") or "").strip() or "https://integrations.emergentagent.com"
+STORAGE_URL = STORAGE_BASE.rstrip("/") + "/objstore/api/v1/storage"
+EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
+APP_NAME = "kalama"
+MAX_UPLOAD = 8 * 1024 * 1024
+IMAGE_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+SITE_IMAGE_KEYS = {"hero", "about", "location-malaga", "location-sliema", "foodtruck", "gallery"}
+_storage_key: Optional[str] = None
+
+
+async def init_storage(force: bool = False) -> str:
+    global _storage_key
+    if _storage_key and not force:
+        return _storage_key
+    async with httpx.AsyncClient(timeout=30) as http:
+        resp = await http.post(f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY})
+    resp.raise_for_status()
+    _storage_key = resp.json()["storage_key"]
+    return _storage_key
+
+
+async def put_object(path: str, data: bytes, content_type: str) -> dict:
+    key = await init_storage()
+    async with httpx.AsyncClient(timeout=120) as http:
+        resp = await http.put(f"{STORAGE_URL}/objects/{path}",
+                              headers={"X-Storage-Key": key, "Content-Type": content_type}, content=data)
+        if resp.status_code == 404:
+            key = await init_storage(force=True)
+            resp = await http.put(f"{STORAGE_URL}/objects/{path}",
+                                  headers={"X-Storage-Key": key, "Content-Type": content_type}, content=data)
+    resp.raise_for_status()
+    return resp.json()
+
+
+async def get_object(path: str) -> tuple[bytes, str]:
+    key = await init_storage()
+    async with httpx.AsyncClient(timeout=60) as http:
+        resp = await http.get(f"{STORAGE_URL}/objects/{path}", headers={"X-Storage-Key": key})
+    resp.raise_for_status()
+    return resp.content, resp.headers.get("Content-Type", "application/octet-stream")
+
+
+async def store_image(data: bytes, content_type: str, original_name: str) -> str:
+    ext = IMAGE_TYPES[content_type]
+    path = f"{APP_NAME}/uploads/{uuid.uuid4()}.{ext}"
+    result = await put_object(path, data, content_type)
+    await db.files.insert_one({
+        "id": str(uuid.uuid4()), "storage_path": result["path"], "original_filename": original_name,
+        "content_type": content_type, "size": result.get("size", len(data)), "is_deleted": False,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return f"/api/files/{result['path']}"
+
+
+@api_router.post("/admin/upload")
+async def admin_upload(request: Request, file: UploadFile = File(...)):
+    require_admin(request)
+    if file.content_type not in IMAGE_TYPES:
+        raise HTTPException(status_code=415, detail="Formato non supportato: usa JPG, PNG o WebP")
+    data = await file.read()
+    if len(data) > MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="Immagine troppo grande (max 8 MB)")
+    try:
+        url = await store_image(data, file.content_type, file.filename or "upload")
+    except httpx.HTTPStatusError as e:
+        logger.error(f"Upload failed: {e}")
+        raise HTTPException(status_code=502, detail="Caricamento sul cloud non riuscito, riprova")
+    return {"url": url}
+
+
+@api_router.get("/files/{path:path}")
+async def serve_file(path: str):
+    record = await db.files.find_one({"storage_path": path, "is_deleted": False})
+    if not record:
+        raise HTTPException(status_code=404, detail="File non trovato")
+    try:
+        data, content_type = await get_object(path)
+    except httpx.HTTPStatusError:
+        raise HTTPException(status_code=404, detail="File non trovato")
+    return Response(content=data, media_type=record.get("content_type", content_type),
+                    headers={"Cache-Control": "public, max-age=31536000, immutable"})
+
+
+class SiteImageUpdate(BaseModel):
+    value: Union[str, list[str]]
+
+
+@api_router.get("/site-images")
+async def get_site_images():
+    docs = await db.site_images.find({}, {"_id": 0}).to_list(50)
+    return {d["key"]: d["value"] for d in docs}
+
+
+@api_router.put("/admin/site-images/{key}")
+async def set_site_image(key: str, body: SiteImageUpdate, request: Request):
+    require_admin(request)
+    if key not in SITE_IMAGE_KEYS:
+        raise HTTPException(status_code=404, detail="Chiave immagine non valida")
+    if (key == "gallery") != isinstance(body.value, list):
+        raise HTTPException(status_code=422, detail="Tipo valore non valido per questa chiave")
+    await db.site_images.update_one({"key": key}, {"$set": {"key": key, "value": body.value}}, upsert=True)
+    return {"ok": True}
 
 
 app.include_router(api_router)

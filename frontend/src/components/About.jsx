@@ -1,7 +1,10 @@
 import { motion } from "framer-motion";
 import { KineticLines } from "./Kinetic";
+import { imgUrl } from "../lib/img";
 
-export const About = ({ t }) => {
+const DEFAULT_IMG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-3-7495723.jpg";
+
+export const About = ({ t, image }) => {
   return (
     <section id="chi-siamo" data-testid="about-section" className="py-24 sm:py-32 bg-cream overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
@@ -41,14 +44,15 @@ export const About = ({ t }) => {
           >
             <div className="border-2 border-ink rounded-3xl overflow-hidden shadow-hard grain">
               <img
-                src="https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-3-7495723.jpg"
-                alt="Kalamà panino di mare"
+                src={imgUrl(image) || DEFAULT_IMG}
+                data-testid="about-image"
+                alt="Kalamà street food di mare"
                 loading="lazy"
                 className="w-full h-[440px] object-cover"
               />
             </div>
             <div className="absolute -bottom-6 -left-6 bg-coral border-2 border-ink rounded-2xl px-6 py-4 shadow-hard-sm -rotate-3">
-              <span className="font-display text-2xl text-white tracking-wide">{t.hero.since}</span>
+              <span className="font-display text-2xl text-ink tracking-wide">{t.hero.since}</span>
             </div>
           </motion.div>
         </div>

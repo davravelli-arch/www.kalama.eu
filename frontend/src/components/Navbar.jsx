@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Fish, Globe, Phone, Menu as MenuIcon, X } from "lucide-react";
+import { Globe, Phone, Menu as MenuIcon, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
+import { Logo } from "./Logo";
 
 const LANGS = [
   ["it", "Italiano"],
@@ -33,11 +34,8 @@ export const Navbar = ({ t, lang, setLang }) => {
       className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-2 border-ink"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-        <a href="#top" data-testid="nav-logo" className="flex items-center gap-2">
-          <span className="bg-coral border-2 border-ink rounded-full p-1.5">
-            <Fish className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </span>
-          <span className="font-display text-3xl tracking-wide text-ink">KALAMÀ</span>
+        <a href="#top" data-testid="nav-logo" className="flex items-center">
+          <Logo variant="dark" className="h-9 sm:h-10" testId="nav-logo-img" />
         </a>
 
         <nav className="hidden lg:flex items-center gap-8">
@@ -81,7 +79,7 @@ export const Navbar = ({ t, lang, setLang }) => {
           <a
             href="#sedi"
             data-testid="nav-order-cta"
-            className="hidden sm:flex items-center gap-2 bg-coral text-white border-2 border-ink rounded-full px-5 py-2 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
+            className="hidden sm:flex items-center gap-2 bg-coral text-ink border-2 border-ink rounded-full px-5 py-2 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
           >
             <Phone className="w-4 h-4" />
             {t.nav.order}

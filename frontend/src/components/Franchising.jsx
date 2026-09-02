@@ -79,7 +79,7 @@ export const Franchising = ({ t }) => {
               type="submit"
               disabled={sending}
               data-testid="franchise-submit-btn"
-              className="mt-2 inline-flex items-center justify-center gap-2 bg-coral text-white border-2 border-ink rounded-full px-8 py-4 font-bold uppercase tracking-wide shadow-hard-sm btn-lift disabled:opacity-60"
+              className="mt-2 inline-flex items-center justify-center gap-2 bg-coral text-ink border-2 border-ink rounded-full px-8 py-4 font-bold uppercase tracking-wide shadow-hard-sm btn-lift disabled:opacity-60"
             >
               <Send className="w-5 h-5" />
               {sending ? t.franchising.sending : t.franchising.submit}
