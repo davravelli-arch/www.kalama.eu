@@ -1,0 +1,127 @@
+{
+  "theme": "light",
+  "archetype": "VIBRANT PLAY / DOPAMINE MAXIMALISM",
+  "typography": {
+    "headings": "Bebas Neue",
+    "body": "Outfit",
+    "strategy": "Bold, punchy, oversized headings with tight letter spacing (tracking-tight) to create a lively street-food aesthetic. Body text should be geometric, friendly, and highly readable."
+  },
+  "colors": {
+    "background": "#FAF9F6",
+    "foreground": "#0A192F",
+    "primary": "#FF6B6B",
+    "secondary": "#0055FF",
+    "accent": "#FFD166",
+    "strategy": "High contrast and vibrant. Warm off-white background with dopamine-inducing accent blocks in Coral Pink (primary), Ocean Blue (secondary), and Lemon Yellow (accent).",
+    "rules": "Avoid generic gradients. Rely on high-saturation flat colors."
+  },
+  "visual_enhancers": {
+    "shadows": "Hard 4px or 8px solid shadows (neo-brutalist touch) for interactive elements and bento cards to give it a raw, youthful street food vibe.",
+    "textures": "Subtle noise overlay (grain) on colored containers to remove digital flatness.",
+    "borders": "2px solid dark borders (#0A192F) on bento cards and buttons to make the vibrant colors pop."
+  },
+  "layouts": {
+    "strategy": "Hero-first layout with full-bleed imagery and massive typography. The 'Bento' Grid Protocol (Mode A: The Tetris Grid) for the Menu/Products section to create asymmetry and visual tension.",
+    "spacing": "Generous. Use p-8 or p-12 for bento cards, py-24 for main vertical sections."
+  },
+  "sections": [
+    {
+      "name": "Header & Nav",
+      "description": "Sticky glassmorphism header (backdrop-blur-xl, bg-white/80). Includes Logo, Nav Links, Language Switcher (IT/EN), and a vibrant pill-shaped 'Ordina Ora / Order Now' CTA."
+    },
+    {
+      "name": "Hero",
+      "description": "Massive 'Bebas Neue' typography overlaid on a mouth-watering fish burger or poke bowl image. High contrast overlay to ensure text readability. Floating call-to-action for Take Away with a phone icon."
+    },
+    {
+      "name": "Chi Siamo (About)",
+      "description": "Asymmetrical layout. Large text block explaining the Kalama philosophy (fresh fish, fast food speed) on one side, candid lively restaurant photo on the other."
+    },
+    {
+      "name": "Servizi/Prodotti (Menu)",
+      "description": "Bento grid (Tetris Grid). Showcasing categories: Poke Bowls, Fish Burgers, Fried Fish, and Seafood. Cards should have solid dark borders and vibrant backgrounds on hover."
+    },
+    {
+      "name": "Franchising",
+      "description": "High energy section with a solid Ocean Blue (#0055FF) background. Text in Lemon Yellow and White. Includes an inquiry form using Shadcn components."
+    },
+    {
+      "name": "Galleria Foto (Gallery)",
+      "description": "A continuous scrolling marquee of vibrant food and restaurant lifestyle images. Use framer-motion or react-fast-marquee."
+    },
+    {
+      "name": "Modulo di Contatto & Footer",
+      "description": "Shadcn contact form side-by-side with location/take-away details. Massive Footer typography for the brand name."
+    }
+  ],
+  "image_urls": {
+    "hero": [
+      {
+        "url": "https://images.unsplash.com/photo-1771875600033-ad2a71d3fe98?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwyfHxmaXNoJTIwYnVyZ2VyJTIwc2VhZm9vZCUyMGZhc3QlMjBmb29kfGVufDB8fHx8MTc4ODMzNDQ4M3ww&ixlib=rb-4.1.0&q=85",
+        "category": "Hero Background",
+        "description": "Delicious salmon sandwich with pickled onions"
+      }
+    ],
+    "menu": [
+      {
+        "url": "https://images.unsplash.com/photo-1597958792579-bd3517df6399?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDN8MHwxfHNlYXJjaHwxfHxwb2tlJTIwYm93bCUyMGZyZXNoJTIwY29sb3JmdWx8ZW58MHx8fHwxNzg4MzM0NDgzfDA&ixlib=rb-4.1.0&q=85",
+        "category": "Poke Bowls",
+        "description": "Vibrant poke bowl on dark background"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1671522635273-f70d28b00493?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxmaXNoJTIwYnVyZ2VyJTIwc2VhZm9vZCUyMGZhc3QlMjBmb29kfGVufDB8fHx8MTc4ODMzNDQ4M3ww&ixlib=rb-4.1.0&q=85",
+        "category": "Fish Burgers",
+        "description": "Fish burger with onion rings"
+      }
+    ],
+    "gallery_and_about": [
+      {
+        "url": "https://images.pexels.com/photos/29039528/pexels-photo-29039528.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "category": "Lively Atmosphere",
+        "description": "Vibrant Asian market setting"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1763703396043-cc821fcc4bc2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHxwZW9wbGUlMjBlYXRpbmclMjBsaXZlbHklMjBzdHJlZXQlMjBmb29kfGVufDB8fHx8MTc4ODMzNDQ4M3ww&ixlib=rb-4.1.0&q=85",
+        "category": "Street Food Vibe",
+        "description": "Busy street food market at night"
+      }
+    ]
+  },
+  "motion": {
+    "scrolling": "Use lenis for smooth momentum scrolling. It gives the site a premium weight.",
+    "interactions": "Hover states on buttons use slight lift (-translate-y-1) and shadow expansion. Staggered entrance animations for bento grid items.",
+    "marquee": "Use react-fast-marquee for a vibrant 'FRESH FISH • FAST FOOD • FRANCHISING' ticker."
+  },
+  "components": {
+    "forms": "Use Shadcn Input, Textarea, Button, Checkbox. Customize borders to be 2px solid dark with slight shadow to match the dopamine/neo-brutalist theme.",
+    "navigation": "Sticky glassmorphism header (backdrop-blur-xl, bg-white/70) with language switcher (Shadcn DropdownMenu for IT/EN). DO NOT use fully transparent headers."
+  },
+  "instructions_to_main_agent": [
+    "Install Bebas Neue and Outfit fonts via Google Fonts.",
+    "Install lucide-react for icons (e.g., Phone, MapPin, Globe, Menu).",
+    "Install react-fast-marquee for the text ticker.",
+    "Install @studio-freight/react-lenis for smooth scrolling.",
+    "Install framer-motion for page transitions and scroll animations.",
+    "Apply `data-testid` to all interactive elements (e.g., data-testid='lang-switcher', data-testid='franchise-submit-btn', data-testid='takeaway-call-btn').",
+    "Ensure multilingual support by wrapping text strings in a simple context or state (IT/EN) - default to IT since it is an Italian brand.",
+    "Do NOT use HTML `<select>` for the language switcher, use Shadcn DropdownMenu.",
+    "Implement the Bento grid exactly as described: asymmetrical, varying heights, no empty generic columns.",
+    "DO NOT use generic Vercel-like styles; apply the vibrant colors, solid borders, and bold typography as defined."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: `transition: all`. Always add transitions for specific interactive elements like button, input excluding transforms.",
+    "You MUST NOT center align the app container, ie do not add `.App { text-align: center; }` in the css file.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style.",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Use `sonner` for toasts. Sonner component is located in `/app/frontend/src/components/ui/sonner.jsx`."
+  ]
+}
