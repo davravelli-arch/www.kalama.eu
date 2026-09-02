@@ -1,0 +1,33 @@
+{
+  "summary": "Full E2E test of Kalamà (FastAPI+Mongo+React). Backend: 13 pytest tests, all pass (public menu 26 dishes, contact/franchising forms, admin login incl. wrong password 401, JWT protection, menu CRUD with public-menu persistence checks, 409/404/422 edge cases). Frontend: all 6 languages (IT/EN/ES/DE/FR/PT) render without crash/blank page with translated nav/hero/filters; 26 real dishes rendered; all 7 category filters filter correctly; menu-note pill shows 'Carta reale Kalamà Málaga · Prezzi in euro'; ES location cards show correct EN fallback for kind/hours (no undefined); contact + franchising forms show success toasts; admin flow (wrong pwd error → login → 26 rows → edit gozo 16.50 visible on public site → restored to 15.00 → create test-polpo visible publicly → delete → logout → password required after reload) all pass. ONE real bug found: WhatsApp Sliema link is https://wa.me/undefined. Menu left in original state: 26 dishes, Gozo €15.00, no test items.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/admin/login", "issue": "Lockout counter never resets after the 15-min window expires: failed count keeps growing and locked_until is refreshed on every wrong attempt, so once count>=5 the IP is effectively re-locked by any single later wrong attempt. Consider resetting count when the window expires."},
+      {"endpoint": "POST /api/admin/login", "issue": "hmac.compare_digest(str, str) raises TypeError (500) if a submitted password contains non-ASCII characters. Compare encoded bytes instead."},
+      {"endpoint": "global", "issue": "CORSMiddleware uses allow_credentials=True with CORS_ORIGINS defaulting to '*' — browsers reject wildcard+credentials. Only impacts requests if a wildcard is configured (currently CORS_ORIGINS is set in .env)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "WhatsAppFloat / locations.js", "issue": "Sliema WhatsApp button href is 'https://wa.me/undefined' — the sliema entry in /app/frontend/src/locations.js has no 'whatsapp' field (should be '35679900819'). Málaga href is correct (https://wa.me/34610755695).", "selector": "[data-testid=\"whatsapp-sliema\"]", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": ["Add whatsapp: \"35679900819\" to the sliema object in /app/frontend/src/locations.js so [data-testid=whatsapp-sliema] points to https://wa.me/35679900819", "Optional hardening: reset brute-force counter after lockout window, encode passwords before hmac.compare_digest"],
+  "critical_code_review_comments": [
+    "locations.js sliema lacks the 'whatsapp' key consumed by WhatsAppFloat.jsx -> produces wa.me/undefined; add a defensive guard (skip rendering the button when l.whatsapp is missing).",
+    "Admin token is stored in localStorage (no httpOnly cookie); acceptable for a single-password mini panel but worth noting security-wise.",
+    "Menu seed only runs when collection is empty; changing MENU_SEED later will not update an existing DB (documented behaviour, no action needed now)."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "seed_data_creation": "Temporary: test-polpo menu item (created and deleted), TEST_QA contact/franchising messages in db.messages (harmless test records). Menu restored to the original 26 dishes with Gozo Sandwich at €15.00.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Admin password KalamaMare2026! at /admin (from /app/memory/test_credentials.md)",
+  "context_for_next_testing_agent": "Backend regression suite: /app/backend/tests/backend_test.py (run with `cd /app/backend && python -m pytest tests/backend_test.py -v`). It performs exactly ONE wrong-password login then a correct login (which clears the lockout counter) — do not add extra wrong-password attempts. All admin CRUD tests clean up after themselves. Only outstanding defect: wa.me/undefined for Sliema.",
+  "rca_of_the_issue": "WhatsAppFloat.jsx builds hrefs as `https://wa.me/${l.whatsapp}` by mapping over locations; the sliema record in locations.js was never given a 'whatsapp' property (only phone/phoneHref), so template interpolation yields the string 'undefined'."
+}

@@ -18,8 +18,9 @@ export const MenuSection = ({ t, lang }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  const cats = ["all", "poke", "burger", "fritti", "mare"];
+  const cats = ["all", "cucina", "pasta", "fritti", "grill", "insalate", "panini", "dolci"];
   const filtered = filter === "all" ? items : items.filter((i) => i.category === filter);
+  const field = (item, key) => item[`${key}_${lang}`] || item[`${key}_en`];
 
   return (
     <section id="menu" data-testid="menu-section" className="py-24 sm:py-32 bg-white border-y-2 border-ink">
@@ -30,6 +31,9 @@ export const MenuSection = ({ t, lang }) => {
           className="font-display text-5xl sm:text-6xl lg:text-8xl leading-[0.92] mt-4 text-ink"
         />
         <p className="text-base sm:text-lg text-ink/70 mt-4 font-medium max-w-xl">{t.menu.subtitle}</p>
+        <p data-testid="menu-note" className="inline-block bg-lemon border-2 border-ink rounded-full px-5 py-2 text-sm font-bold mt-4 shadow-hard-sm">
+          {t.menu.note}
+        </p>
 
         <div data-testid="menu-filters" className="flex flex-wrap gap-3 mt-10">
           {cats.map((c) => (
@@ -65,26 +69,26 @@ export const MenuSection = ({ t, lang }) => {
                 <div className="relative overflow-hidden border-b-2 border-ink">
                   <img
                     src={item.image}
-                    alt={item[`name_${lang}`]}
+                    alt={field(item, "name")}
                     loading="lazy"
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  {item[`tag_${lang}`] && (
+                  {field(item, "tag") && (
                     <span className="absolute top-3 left-3 bg-lemon border-2 border-ink rounded-full px-3 py-1 text-xs font-bold uppercase shadow-hard-sm">
-                      {item[`tag_${lang}`]}
+                      {field(item, "tag")}
                     </span>
                   )}
                 </div>
                 <div className="p-5 bg-cream group-hover:bg-lemon transition-colors duration-300">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-display text-2xl tracking-wide text-ink leading-none">
-                      {item[`name_${lang}`]}
+                      {field(item, "name")}
                     </h3>
                     <span data-testid={`menu-price-${item.id}`} className="font-display text-2xl text-coral whitespace-nowrap">
                       {t.menu.currency}{item.price.toFixed(2)}
                     </span>
                   </div>
-                  <p className="text-sm text-ink/70 mt-2 font-medium">{item[`desc_${lang}`]}</p>
+                  <p className="text-sm text-ink/70 mt-2 font-medium">{field(item, "desc")}</p>
                 </div>
               </motion.article>
             ))}

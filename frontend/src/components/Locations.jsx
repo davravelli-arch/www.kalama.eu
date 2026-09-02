@@ -39,7 +39,7 @@ export const Locations = ({ t, lang }) => {
                   {loc.num}
                 </span>
                 <span className="absolute bottom-4 left-4 bg-ink text-lemon border-2 border-lemon rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest">
-                  {loc[`kind_${lang}`]}
+                  {loc[`kind_${lang}`] || loc.kind_en}
                 </span>
               </div>
 
@@ -56,7 +56,7 @@ export const Locations = ({ t, lang }) => {
                   </a>
                   <p className="flex items-center gap-3">
                     <Clock className="w-5 h-5 text-coral shrink-0" strokeWidth={2.5} />
-                    {loc[`hours_${lang}`]}
+                    {loc[`hours_${lang}`] || loc.hours_en}
                   </p>
                   <a href={`mailto:${loc.email}`} data-testid={`location-email-${loc.id}`} className="flex items-center gap-3 hover:text-ocean transition-colors">
                     <Mail className="w-5 h-5 text-coral shrink-0" strokeWidth={2.5} />

@@ -36,7 +36,7 @@ export const Footer = ({ t }) => {
       </h2>
       <div className="border-t border-cream/20 py-6">
         <p data-testid="footer-rights" className="text-center text-cream/50 text-sm font-medium">
-          {t.footer.rights}
+          {t.footer.rights} · <a href="/admin" data-testid="footer-admin-link" className="underline hover:text-lemon transition-colors">Area Admin</a>
         </p>
       </div>
     </footer>

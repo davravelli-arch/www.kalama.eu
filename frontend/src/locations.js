@@ -12,6 +12,7 @@ export const locations = [
     hours_it: "Mar–Dom · 12:00 – 23:30",
     hours_en: "Tue–Sun · 12:00 – 23:30",
     mapsUrl: "https://maps.google.com/?cid=12800882317661358537",
+    whatsapp: "34610755695",
     image: "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-0-7495720.jpg",
     actions: [
       { id: "thefork", label: "TheFork", kind: "book", url: "https://www.thefork.es/restaurante/kalama-malaga-r866671" },
@@ -31,6 +32,7 @@ export const locations = [
     hours_it: "Ogni giorno · 12:00 – 23:00",
     hours_en: "Every day · 12:00 – 23:00",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=111+Triq+ix-Xatt+Sliema+Malta",
+    whatsapp: "35679900819",
     image: "https://images.unsplash.com/photo-1763703396043-cc821fcc4bc2?q=80&w=1200&auto=format&fit=crop",
     actions: [
       { id: "bolt", label: "Bolt Food", kind: "order", url: "https://food.bolt.eu/en/324-valletta/p/80230-kalama-the-real-fish-street-food-crab-go/" },

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lenis from "lenis";
 import { Toaster } from "sonner";
 import "@/App.css";
@@ -13,8 +14,10 @@ import { Gallery } from "@/components/Gallery";
 import { Franchising } from "@/components/Franchising";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
+import Admin from "@/components/Admin";
 
-function App() {
+function Landing() {
   const [lang, setLang] = useState("it");
   const t = translations[lang];
 
@@ -41,8 +44,20 @@ function App() {
         <Contact t={t} />
       </main>
       <Footer t={t} />
-      <Toaster position="bottom-right" richColors />
+      <WhatsAppFloat t={t} />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+      <Toaster position="bottom-left" richColors />
+    </BrowserRouter>
   );
 }
 

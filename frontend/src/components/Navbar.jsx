@@ -7,6 +7,15 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 
+const LANGS = [
+  ["it", "Italiano"],
+  ["en", "English"],
+  ["es", "Español"],
+  ["de", "Deutsch"],
+  ["fr", "Français"],
+  ["pt", "Português"],
+];
+
 export const Navbar = ({ t, lang, setLang }) => {
   const [open, setOpen] = useState(false);
   const links = [
@@ -56,12 +65,16 @@ export const Navbar = ({ t, lang, setLang }) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="border-2 border-ink">
-              <DropdownMenuItem data-testid="lang-option-it" onClick={() => setLang("it")} className="font-semibold cursor-pointer">
-                Italiano
-              </DropdownMenuItem>
-              <DropdownMenuItem data-testid="lang-option-en" onClick={() => setLang("en")} className="font-semibold cursor-pointer">
-                English
-              </DropdownMenuItem>
+              {LANGS.map(([code, label]) => (
+                <DropdownMenuItem
+                  key={code}
+                  data-testid={`lang-option-${code}`}
+                  onClick={() => setLang(code)}
+                  className={`font-semibold cursor-pointer ${lang === code ? "text-coral" : ""}`}
+                >
+                  {label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
