@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { KineticLines } from "./Kinetic";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -24,9 +25,10 @@ export const MenuSection = ({ t, lang }) => {
     <section id="menu" data-testid="menu-section" className="py-24 sm:py-32 bg-white border-y-2 border-ink">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <span className="text-ocean font-bold uppercase tracking-widest text-sm">{t.menu.kicker}</span>
-        <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] mt-4 text-ink">
-          {t.menu.title}
-        </h2>
+        <KineticLines
+          lines={t.menu.titleLines}
+          className="font-display text-5xl sm:text-6xl lg:text-8xl leading-[0.92] mt-4 text-ink"
+        />
         <p className="text-base sm:text-lg text-ink/70 mt-4 font-medium max-w-xl">{t.menu.subtitle}</p>
 
         <div data-testid="menu-filters" className="flex flex-wrap gap-3 mt-10">

@@ -8,6 +8,7 @@ import { Hero } from "@/components/Hero";
 import { Ticker } from "@/components/Ticker";
 import { About } from "@/components/About";
 import { MenuSection } from "@/components/MenuSection";
+import { Locations } from "@/components/Locations";
 import { Gallery } from "@/components/Gallery";
 import { Franchising } from "@/components/Franchising";
 import { Contact } from "@/components/Contact";
@@ -23,7 +24,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    document.title = "Kalama — Fish Fast Food & Take Away";
+    document.title = "Kalamà — Fish Street Food · Malaga & Malta";
   }, []);
 
   return (
@@ -34,6 +35,7 @@ function App() {
         <Ticker t={t} />
         <About t={t} />
         <MenuSection t={t} lang={lang} />
+        <Locations t={t} lang={lang} />
         <Gallery t={t} />
         <Franchising t={t} />
         <Contact t={t} />

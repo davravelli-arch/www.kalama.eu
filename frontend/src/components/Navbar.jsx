@@ -12,6 +12,7 @@ export const Navbar = ({ t, lang, setLang }) => {
   const links = [
     { href: "#chi-siamo", label: t.nav.about, id: "about" },
     { href: "#menu", label: t.nav.menu, id: "menu" },
+    { href: "#sedi", label: t.nav.locations, id: "locations" },
     { href: "#galleria", label: t.nav.gallery, id: "gallery" },
     { href: "#franchising", label: t.nav.franchising, id: "franchising" },
     { href: "#contatti", label: t.nav.contact, id: "contact" },
@@ -27,7 +28,7 @@ export const Navbar = ({ t, lang, setLang }) => {
           <span className="bg-coral border-2 border-ink rounded-full p-1.5">
             <Fish className="w-5 h-5 text-white" strokeWidth={2.5} />
           </span>
-          <span className="font-display text-3xl tracking-wide text-ink">KALAMA</span>
+          <span className="font-display text-3xl tracking-wide text-ink">KALAMÀ</span>
         </a>
 
         <nav className="hidden lg:flex items-center gap-8">
@@ -65,7 +66,7 @@ export const Navbar = ({ t, lang, setLang }) => {
           </DropdownMenu>
 
           <a
-            href="tel:+390401234567"
+            href="#sedi"
             data-testid="nav-order-cta"
             className="hidden sm:flex items-center gap-2 bg-coral text-white border-2 border-ink rounded-full px-5 py-2 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
           >

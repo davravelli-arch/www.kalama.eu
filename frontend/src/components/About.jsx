@@ -1,65 +1,75 @@
 import { motion } from "framer-motion";
-import { Waves, Timer, UtensilsCrossed } from "lucide-react";
+import { KineticLines } from "./Kinetic";
 
 export const About = ({ t }) => {
-  const stats = [
-    { icon: Waves, text: t.about.stat1, bg: "bg-ocean" },
-    { icon: Timer, text: t.about.stat2, bg: "bg-coral" },
-    { icon: UtensilsCrossed, text: t.about.stat3, bg: "bg-lemon" },
-  ];
-
   return (
     <section id="chi-siamo" data-testid="about-section" className="py-24 sm:py-32 bg-cream overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 grid lg:grid-cols-2 gap-16 items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="text-coral font-bold uppercase tracking-widest text-sm">{t.about.kicker}</span>
-          <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] mt-4 text-ink">
-            {t.about.title}
-          </h2>
-          <p className="text-base sm:text-lg text-ink/80 mt-8 font-medium">{t.about.p1}</p>
-          <p className="text-base sm:text-lg text-ink/80 mt-4 font-medium">{t.about.p2}</p>
-
-          <div className="flex flex-col gap-4 mt-10">
-            {stats.map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                data-testid={`about-stat-${i}`}
-                className={`inline-flex items-center gap-3 ${s.bg} ${s.bg === "bg-lemon" ? "text-ink" : "text-white"} border-2 border-ink rounded-full px-5 py-3 font-bold text-sm sm:text-base shadow-hard-sm w-fit`}
-              >
-                <s.icon className="w-5 h-5" strokeWidth={2.5} />
-                {s.text}
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 40, rotate: 3 }}
-          whileInView={{ opacity: 1, x: 0, rotate: 2 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="relative"
-        >
-          <div className="border-2 border-ink rounded-3xl overflow-hidden shadow-hard grain">
-            <img
-              src="https://images.pexels.com/photos/29039528/pexels-photo-29039528.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-              alt="Kalama street food atmosphere"
-              className="w-full h-[480px] object-cover"
+      <div className="max-w-7xl mx-auto px-4 sm:px-8">
+        <div className="grid lg:grid-cols-12 gap-14 items-center mb-20">
+          <div className="lg:col-span-7">
+            <span className="text-coral font-bold uppercase tracking-widest text-sm">{t.about.kicker}</span>
+            <KineticLines
+              lines={t.about.titleLines}
+              className="font-display text-5xl sm:text-6xl lg:text-8xl leading-[0.92] mt-4 text-ink"
             />
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.7 }}
+              className="text-base sm:text-lg text-ink/80 mt-8 font-medium max-w-xl"
+            >
+              {t.about.p1}
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.45, duration: 0.7 }}
+              className="text-base sm:text-lg text-ink/80 mt-4 font-medium max-w-xl"
+            >
+              {t.about.p2}
+            </motion.p>
           </div>
-          <div className="absolute -bottom-6 -left-6 bg-coral border-2 border-ink rounded-2xl px-6 py-4 shadow-hard-sm -rotate-3">
-            <span className="font-display text-2xl text-white tracking-wide">{t.hero.since}</span>
-          </div>
-        </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 40, rotate: 4 }}
+            whileInView={{ opacity: 1, x: 0, rotate: 2 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-5 relative"
+          >
+            <div className="border-2 border-ink rounded-3xl overflow-hidden shadow-hard grain">
+              <img
+                src="https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-3-7495723.jpg"
+                alt="Kalamà panino di mare"
+                loading="lazy"
+                className="w-full h-[440px] object-cover"
+              />
+            </div>
+            <div className="absolute -bottom-6 -left-6 bg-coral border-2 border-ink rounded-2xl px-6 py-4 shadow-hard-sm -rotate-3">
+              <span className="font-display text-2xl text-white tracking-wide">{t.hero.since}</span>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="grid md:grid-cols-3 border-t-2 border-ink">
+          {t.about.chapters.map((c, i) => (
+            <motion.div
+              key={c.num}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15, duration: 0.7 }}
+              data-testid={`about-chapter-${c.num}`}
+              className="py-10 md:px-10 md:border-l-2 md:first:border-l-0 border-ink"
+            >
+              <span className="font-display text-7xl sm:text-8xl text-outline block leading-none select-none">{c.num}</span>
+              <h3 className="font-display text-3xl sm:text-4xl text-ink tracking-wide mt-4">{c.title}</h3>
+              <p className="text-ink/70 font-medium mt-3">{c.text}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

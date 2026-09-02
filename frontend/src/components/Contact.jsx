@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Phone, Clock, Send } from "lucide-react";
+import { Phone, Mail, Send, ArrowRight } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { KineticLines } from "./Kinetic";
+import { locations } from "../locations";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -28,12 +30,6 @@ export const Contact = ({ t }) => {
     }
   };
 
-  const info = [
-    { icon: MapPin, label: t.contact.findUs, value: t.contact.address, id: "address" },
-    { icon: Phone, label: t.contact.callUs, value: t.contact.phone, id: "phone", href: "tel:+390401234567" },
-    { icon: Clock, label: t.contact.hoursLabel, value: t.contact.hours, id: "hours" },
-  ];
-
   const inputCls =
     "border-2 border-ink bg-white rounded-xl h-12 font-medium focus-visible:ring-ocean focus-visible:ring-offset-0 shadow-hard-sm";
 
@@ -41,9 +37,10 @@ export const Contact = ({ t }) => {
     <section id="contatti" data-testid="contact-section" className="py-24 sm:py-32 bg-cream">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <span className="text-ocean font-bold uppercase tracking-widest text-sm">{t.contact.kicker}</span>
-        <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] mt-4 text-ink">
-          {t.contact.title}
-        </h2>
+        <KineticLines
+          lines={t.contact.titleLines}
+          className="font-display text-5xl sm:text-6xl lg:text-8xl leading-[0.92] mt-4 text-ink"
+        />
 
         <div className="grid lg:grid-cols-2 gap-10 mt-14">
           <motion.div
@@ -52,32 +49,31 @@ export const Contact = ({ t }) => {
             viewport={{ once: true }}
             className="bg-lemon border-2 border-ink rounded-3xl p-8 sm:p-10 shadow-hard grain flex flex-col gap-8"
           >
-            {info.map((item) => (
-              <div key={item.id} data-testid={`contact-info-${item.id}`} className="flex items-start gap-4 relative z-10">
-                <span className="bg-coral border-2 border-ink rounded-full p-3 shrink-0">
-                  <item.icon className="w-5 h-5 text-white" strokeWidth={2.5} />
-                </span>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-ink/60">{item.label}</p>
-                  {item.href ? (
-                    <a href={item.href} className="font-display text-2xl sm:text-3xl text-ink tracking-wide hover:text-coral transition-colors">
-                      {item.value}
-                    </a>
-                  ) : (
-                    <p className="font-display text-2xl sm:text-3xl text-ink tracking-wide">{item.value}</p>
-                  )}
-                </div>
+            <div className="relative z-10">
+              <h3 className="font-display text-4xl text-ink tracking-wide">{t.contact.quickTitle}</h3>
+              <p className="text-ink/70 font-medium mt-1">{t.contact.quickNote}</p>
+            </div>
+            {locations.map((loc) => (
+              <div key={loc.id} data-testid={`contact-quick-${loc.id}`} className="relative z-10 border-2 border-ink bg-cream rounded-2xl p-5 shadow-hard-sm">
+                <p className="text-xs font-bold uppercase tracking-widest text-ink/60">{loc.name}</p>
+                <a href={loc.phoneHref} className="flex items-center gap-3 mt-2 hover:text-coral transition-colors">
+                  <Phone className="w-5 h-5 text-coral shrink-0" strokeWidth={2.5} />
+                  <span className="font-display text-2xl sm:text-3xl text-ink tracking-wide">{loc.phone}</span>
+                </a>
+                <a href={`mailto:${loc.email}`} className="flex items-center gap-3 mt-2 text-ink/80 hover:text-ocean transition-colors font-medium">
+                  <Mail className="w-5 h-5 text-coral shrink-0" strokeWidth={2.5} />
+                  {loc.email}
+                </a>
               </div>
             ))}
-            <div className="relative z-10 border-2 border-ink rounded-2xl overflow-hidden shadow-hard-sm mt-2">
-              <iframe
-                title="Kalama map"
-                data-testid="contact-map"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=13.7480%2C45.6390%2C13.7980%2C45.6590&layer=mapnik&marker=45.6495%2C13.7730"
-                className="w-full h-56"
-                loading="lazy"
-              />
-            </div>
+            <a
+              href="#sedi"
+              data-testid="contact-all-locations"
+              className="relative z-10 inline-flex items-center gap-2 font-bold uppercase tracking-wide text-sm text-ink hover:text-coral transition-colors"
+            >
+              {t.contact.allLocations}
+              <ArrowRight className="w-5 h-5" />
+            </a>
           </motion.div>
 
           <motion.form

@@ -23,17 +23,17 @@ Chiarimenti utente: Kalama è un ristorante di pesce fast food e take away. Sezi
 6. Stile "Vibrant Play": coral #FF6B6B, ocean #0055FF, lemon #FFD166, Bebas Neue + Outfit, bordi 2px ink, hard shadow
 
 ## Implemented (2026-07)
-- [x] Navbar sticky glassmorphism + switch lingua IT/EN + CTA "Ordina Ora" (tel:)
-- [x] Hero full-screen con tipografia gigante e CTA
-- [x] Ticker marquee "Pesce fresco • Fast food • Take away"
-- [x] Chi Siamo asimmetrico con stat pill animate
+- [x] DATI REALI: Kalamà Malaga (Calle Trinidad Grund 7, Soho, 29001 Málaga · +34 610 755 695 · info@kalama.eu · Mar–Dom 12:00–23:30) e Kalamà Sliema (111 Triq ix-Xatt, Sliema SLM 3210, Malta · +356 7990 0819 · kalama.international@gmail.com · ogni giorno 12:00–23:00) + Food Truck Qawra/Buġibba
+- [x] Sezione "Le Sedi" con card numerate, telefoni/email cliccabili, Google Maps, TheFork + Glovo (Malaga), Bolt Food (Sliema)
+- [x] Foto reali (CDN myguide Malaga): hero panino al polpo, About, gallery, menu (Panino al Polpo, Shrimp Burger, Calamari, Salmone)
+- [x] Social: Facebook facebook.com/therealfishstreetfood (verificato); Instagram kalama.seafood (DA CONFERMARE)
+- [x] Rebrand KALAMA → KALAMÀ ovunque
+- [x] Design award-level: hero cinetico (masked line reveal + parallasse + badge circolare rotante), manifesto numerato 01/02/03, marquee editoriale lento ink/lemon, KineticLines su tutti i titoli
+- [x] Navbar sticky glassmorphism + switch lingua IT/EN + CTA "Ordina Ora" (→ #sedi)
 - [x] Menu da DB (12 piatti, prezzi, tag, filtri categoria) — GET /api/menu
-- [x] Galleria marquee con 8 foto coerenti col brand
 - [x] Franchising: pitch + benefit + form → POST /api/franchising (salvato in Mongo)
-- [x] Contatti: info, mappa OpenStreetMap, form → POST /api/contact (salvato in Mongo)
-- [x] Footer con brand typography gigante + social
-- [x] Smooth scrolling (lenis), animazioni framer-motion, toast sonner
-- [x] Verificato: API health/menu/contact/franchising via curl; screenshot di tutte le sezioni; switch EN; submit contatto con toast; filtro menu
+- [x] Contatti: quick-contact per entrambe le sedi + form → POST /api/contact (salvato in Mongo)
+- [x] Verificato: curl menu OK, screenshot hero/about/menu/sedi/contatti OK
 
 ## Backlog
 ### P0
