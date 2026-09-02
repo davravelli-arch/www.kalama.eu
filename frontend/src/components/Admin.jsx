@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { LogOut, ArrowLeft, UtensilsCrossed, Images } from "lucide-react";
+import { LogOut, ArrowLeft, UtensilsCrossed, Images, Eye, EyeOff } from "lucide-react";
 import { Logo } from "./Logo";
 import { API, TOKEN_KEY, Field, inputCls } from "./admin/ui";
 import { MenuManager } from "./admin/MenuManager";
@@ -15,13 +15,14 @@ export default function Admin() {
   const [token, setToken] = useState(localStorage.getItem(TOKEN_KEY) || "");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [tab, setTab] = useState("menu");
 
   const login = async (e) => {
     e.preventDefault();
     setLoginError("");
     try {
-      const { data } = await axios.post(`${API}/admin/login`, { password });
+      const { data } = await axios.post(`${API}/admin/login`, { password: password.trim() });
       localStorage.setItem(TOKEN_KEY, data.token);
       setToken(data.token);
       setPassword("");
@@ -44,8 +45,26 @@ export default function Admin() {
             <h1 className="font-display text-4xl text-ink tracking-wide">AREA ADMIN</h1>
           </div>
           <Field label="Password" testId="admin-password-field">
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} data-testid="admin-password-input" className={inputCls} placeholder="••••••••" />
+            <div className="relative">
+              <input
+                type={showPw ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                data-testid="admin-password-input"
+                className={`${inputCls} pr-12`}
+                placeholder="••••••••"
+              />
+              <button type="button" onClick={() => setShowPw((v) => !v)} data-testid="admin-password-toggle" aria-label={showPw ? "Nascondi password" : "Mostra password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/60 hover:text-ink">
+                {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </Field>
+          <p className="mt-2 text-xs font-medium text-ink/50">La password distingue maiuscole e minuscole.</p>
           {loginError && <p data-testid="admin-login-error" className="mt-3 text-sm font-bold text-coral">{loginError}</p>}
           <button type="submit" data-testid="admin-login-btn" className="mt-6 w-full bg-lemon text-ink border-2 border-ink rounded-full px-8 py-3.5 font-bold uppercase tracking-wide shadow-hard-sm btn-lift">
             Accedi

@@ -1,0 +1,34 @@
+{
+  "summary": "Retest mirato del solo flusso di login admin (backend + frontend) dopo il fix frontend (trim password, toggle mostra/nascondi, autoCapitalize/autoCorrect off, nota case-sensitive). Backend: 6/6 test pytest passati (password corretta -> 200 + JWT valido, token abilita GET /api/admin/menu senza _id, password minuscola -> 401 'Password errata', password con spazi non trimmata -> 401 (trim e solo frontend), body vuoto -> 422, login corretto finale -> 200 e reset contatore). Frontend /admin: login con password corretta -> admin-dashboard; logout -> token rimosso da localStorage; login con '  KalamaMare2026!  ' -> riuscito (trim OK); password errata -> admin-login-error 'Password errata'; toggle password->text->password funzionante con valore digitato visibile; attributi autocapitalize=off, autocorrect=off, spellcheck=false presenti; hint 'La password distingue maiuscole e minuscole' presente; login finale corretto OK e sessione persistente dopo reload. Totale tentativi errati usati: 3 (2 backend + 1 frontend), nessun lockout attivato; collection login_attempts verificata vuota a fine test.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/admin/login", "issue": "Il backend non applica trim/normalizzazione alla password: il trim esiste solo nel client React, quindi qualsiasi altro client (o autofill che aggiunge spazi) riceve 401. Valutare .strip() lato server per allineare il comportamento."},
+      {"endpoint": "/api/admin/login", "issue": "Il campo locked_until viene aggiornato ad ogni tentativo errato anche prima di raggiungere la soglia: il contatore non scade mai finche' l'utente continua a sbagliare (finestra scorrevole). Comportamento accettabile ma non documentato; il messaggio 401 non indica i tentativi rimanenti."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/admin dashboard (subito dopo login)", "issues": ["Mostra brevemente '0 voci · Caricamento...' prima del fetch del menu: il conteggio 0 potrebbe confondere, meglio nasconderlo durante il loading"]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_admin_login.py", "/app/test_reports/pytest/admin_login_results.xml"],
+  "action_items": [
+    "OPZIONALE: applicare .strip() alla password anche lato backend in /api/admin/login per robustezza (attualmente solo frontend)",
+    "OPZIONALE: nascondere il contatore '0 voci' mentre il menu admin e' in caricamento"
+  ],
+  "critical_code_review_comments": [
+    "hmac.compare_digest su stringhe di lunghezza diversa non e' a tempo costante sulla lunghezza, ma per una password singola con lockout il rischio e' trascurabile",
+    "Il fix del bug segnalato dall'utente ('password errata') e' coerente con la RCA: errore di digitazione/spazi; nessun difetto server riprodotto"
+  ],
+  "updated_files": ["/app/backend/tests/test_admin_login.py", "/app/test_reports/iteration_3.json"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Nessuna. Nessuna modifica ai dati; contatore login_attempts azzerato dal login corretto finale (verificato: collection vuota).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Password admin da /app/memory/test_credentials.md (KalamaMare2026!)",
+  "context_for_next_testing_agent": "Il flusso di login admin (backend + frontend, incl. trim e toggle) e' completamente verificato in iteration_3. Nuovo file di test: /app/backend/tests/test_admin_login.py (eseguire con -n 0 per rispettare l'ordine e non superare 2 tentativi errati). Attenzione al lockout per IP: max 5 tentativi errati -> blocco 15 min; terminare sempre con un login corretto. Menu: 105 voci in DB.",
+  "rca_of_the_issue": "Il backend accettava la password corretta in tutti i test; nessun difetto server. La causa dell'errore utente era l'input (maiuscole/spazi, possibile autocapitalize su mobile). Il fix frontend (trim + toggle visibilita' + autoCapitalize/autoCorrect off + nota case-sensitive) risolve i casi riproducibili: la password con spazi iniziali/finali ora esegue il login correttamente."
+}
