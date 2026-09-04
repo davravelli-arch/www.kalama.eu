@@ -8,6 +8,7 @@ export const translations = {
       franchising: "Franchising",
       contact: "Contatti",
       order: "Ordina Ora",
+      reviews: "Recensioni",
     },
     hero: {
       badge: "Malaga · Sliema · Buġibba",
@@ -99,6 +100,24 @@ export const translations = {
     whatsapp: {
       choose: "Scegli la sede e ordina su WhatsApp",
     },
+    reviews: {
+      kicker: "Dicono di noi",
+      titleLines: ["PAROLA", "AI CLIENTI"],
+      subtitle: "Le recensioni di chi ha già assaggiato il mare di Kalamà.",
+      pageTitle: ["LE VOSTRE", "RECENSIONI"],
+      pageSubtitle: "Tutte le opinioni dei nostri clienti a Málaga e Sliema.",
+      all: "Tutte",
+      viewAll: "Leggi tutte le recensioni",
+      google: "Recensioni Google Maps",
+      googleNote: "Mostrate nell'ordine di rilevanza di Google.",
+      viewOnGoogle: "Vedi su Google Maps",
+      report: "Segnala",
+      ratings: "recensioni",
+      curated: "Le preferite",
+      empty: "Le prime recensioni arriveranno presto.",
+      back: "Torna al sito",
+      on: "su",
+    },
   },
   en: {
     nav: {
@@ -109,6 +128,7 @@ export const translations = {
       franchising: "Franchising",
       contact: "Contact",
       order: "Order Now",
+      reviews: "Reviews",
     },
     hero: {
       badge: "Malaga · Sliema · Buġibba",
@@ -200,6 +220,24 @@ export const translations = {
     whatsapp: {
       choose: "Pick a location to order on WhatsApp",
     },
+    reviews: {
+      kicker: "What people say",
+      titleLines: ["OUR GUESTS", "HAVE SPOKEN"],
+      subtitle: "Reviews from those who already tasted the Kalamà sea.",
+      pageTitle: ["YOUR", "REVIEWS"],
+      pageSubtitle: "All our guests' opinions from Málaga and Sliema.",
+      all: "All",
+      viewAll: "Read all reviews",
+      google: "Google Maps reviews",
+      googleNote: "Shown in Google's default relevance order.",
+      viewOnGoogle: "View on Google Maps",
+      report: "Report",
+      ratings: "reviews",
+      curated: "Our favourites",
+      empty: "First reviews coming soon.",
+      back: "Back to site",
+      on: "on",
+    },
   },
   es: {
     nav: {
@@ -210,6 +248,7 @@ export const translations = {
       franchising: "Franquicia",
       contact: "Contacto",
       order: "Pedir Ahora",
+      reviews: "Reseñas",
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
@@ -301,6 +340,24 @@ export const translations = {
     whatsapp: {
       choose: "Elige el local para pedir por WhatsApp",
     },
+    reviews: {
+      kicker: "Dicen de nosotros",
+      titleLines: ["LA PALABRA", "A LOS CLIENTES"],
+      subtitle: "Las reseñas de quienes ya probaron el mar de Kalamà.",
+      pageTitle: ["VUESTRAS", "RESEÑAS"],
+      pageSubtitle: "Todas las opiniones de nuestros clientes en Málaga y Sliema.",
+      all: "Todas",
+      viewAll: "Leer todas las reseñas",
+      google: "Reseñas de Google Maps",
+      googleNote: "Mostradas en el orden de relevancia de Google.",
+      viewOnGoogle: "Ver en Google Maps",
+      report: "Denunciar",
+      ratings: "reseñas",
+      curated: "Nuestras favoritas",
+      empty: "Las primeras reseñas llegarán pronto.",
+      back: "Volver al sitio",
+      on: "en",
+    },
   },
   de: {
     nav: {
@@ -311,6 +368,7 @@ export const translations = {
       franchising: "Franchising",
       contact: "Kontakt",
       order: "Jetzt Bestellen",
+      reviews: "Bewertungen",
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
@@ -402,6 +460,24 @@ export const translations = {
     whatsapp: {
       choose: "Wähle den Standort für deine WhatsApp-Bestellung",
     },
+    reviews: {
+      kicker: "Das sagen unsere Gäste",
+      titleLines: ["UNSERE GÄSTE", "HABEN DAS WORT"],
+      subtitle: "Bewertungen von Gästen, die das Meer von Kalamà schon probiert haben.",
+      pageTitle: ["EURE", "BEWERTUNGEN"],
+      pageSubtitle: "Alle Meinungen unserer Gäste aus Málaga und Sliema.",
+      all: "Alle",
+      viewAll: "Alle Bewertungen lesen",
+      google: "Google-Maps-Bewertungen",
+      googleNote: "In der Relevanz-Reihenfolge von Google angezeigt.",
+      viewOnGoogle: "Auf Google Maps ansehen",
+      report: "Melden",
+      ratings: "Bewertungen",
+      curated: "Unsere Favoriten",
+      empty: "Die ersten Bewertungen kommen bald.",
+      back: "Zurück zur Website",
+      on: "auf",
+    },
   },
   fr: {
     nav: {
@@ -412,6 +488,7 @@ export const translations = {
       franchising: "Franchise",
       contact: "Contact",
       order: "Commander",
+      reviews: "Avis",
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
@@ -503,6 +580,24 @@ export const translations = {
     whatsapp: {
       choose: "Choisissez l'adresse pour commander sur WhatsApp",
     },
+    reviews: {
+      kicker: "Ils parlent de nous",
+      titleLines: ["LA PAROLE", "AUX CLIENTS"],
+      subtitle: "Les avis de ceux qui ont déjà goûté la mer de Kalamà.",
+      pageTitle: ["VOS", "AVIS"],
+      pageSubtitle: "Tous les avis de nos clients à Málaga et Sliema.",
+      all: "Tous",
+      viewAll: "Lire tous les avis",
+      google: "Avis Google Maps",
+      googleNote: "Affichés dans l'ordre de pertinence de Google.",
+      viewOnGoogle: "Voir sur Google Maps",
+      report: "Signaler",
+      ratings: "avis",
+      curated: "Nos préférés",
+      empty: "Les premiers avis arrivent bientôt.",
+      back: "Retour au site",
+      on: "sur",
+    },
   },
   pt: {
     nav: {
@@ -513,6 +608,7 @@ export const translations = {
       franchising: "Franchising",
       contact: "Contactos",
       order: "Pedir Agora",
+      reviews: "Avaliações",
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
@@ -603,6 +699,24 @@ export const translations = {
     },
     whatsapp: {
       choose: "Escolhe a loja para pedir por WhatsApp",
+    },
+    reviews: {
+      kicker: "Dizem de nós",
+      titleLines: ["A PALAVRA", "AOS CLIENTES"],
+      subtitle: "As avaliações de quem já provou o mar do Kalamà.",
+      pageTitle: ["AS VOSSAS", "AVALIAÇÕES"],
+      pageSubtitle: "Todas as opiniões dos nossos clientes em Málaga e Sliema.",
+      all: "Todas",
+      viewAll: "Ler todas as avaliações",
+      google: "Avaliações Google Maps",
+      googleNote: "Mostradas pela ordem de relevância da Google.",
+      viewOnGoogle: "Ver no Google Maps",
+      report: "Denunciar",
+      ratings: "avaliações",
+      curated: "As nossas favoritas",
+      empty: "As primeiras avaliações chegam em breve.",
+      back: "Voltar ao site",
+      on: "no",
     },
   },
 };

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Globe, Phone, Menu as MenuIcon, X } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,14 +20,23 @@ const LANGS = [
 
 export const Navbar = ({ t, lang, setLang }) => {
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const home = pathname === "/" ? "" : "/";
   const links = [
-    { href: "#chi-siamo", label: t.nav.about, id: "about" },
-    { href: "#menu", label: t.nav.menu, id: "menu" },
-    { href: "#sedi", label: t.nav.locations, id: "locations" },
-    { href: "#galleria", label: t.nav.gallery, id: "gallery" },
-    { href: "#franchising", label: t.nav.franchising, id: "franchising" },
-    { href: "#contatti", label: t.nav.contact, id: "contact" },
+    { href: `${home}#chi-siamo`, label: t.nav.about, id: "about" },
+    { href: `${home}#menu`, label: t.nav.menu, id: "menu" },
+    { href: `${home}#sedi`, label: t.nav.locations, id: "locations" },
+    { href: `${home}#galleria`, label: t.nav.gallery, id: "gallery" },
+    { href: "/recensioni", label: t.nav.reviews, id: "reviews", route: true },
+    { href: `${home}#franchising`, label: t.nav.franchising, id: "franchising" },
+    { href: `${home}#contatti`, label: t.nav.contact, id: "contact" },
   ];
+  const NavItem = ({ l, className, testPrefix }) =>
+    l.route ? (
+      <Link to={l.href} data-testid={`${testPrefix}-${l.id}`} onClick={() => setOpen(false)} className={className}>{l.label}</Link>
+    ) : (
+      <a href={l.href} data-testid={`${testPrefix}-${l.id}`} onClick={() => setOpen(false)} className={className}>{l.label}</a>
+    );
 
   return (
     <header
@@ -34,20 +44,13 @@ export const Navbar = ({ t, lang, setLang }) => {
       className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-2 border-ink"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-        <a href="#top" data-testid="nav-logo" className="flex items-center">
+        <a href={`${home}#top`} data-testid="nav-logo" className="flex items-center">
           <Logo variant="dark" className="h-9 sm:h-10" testId="nav-logo-img" />
         </a>
 
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-7">
           {links.map((l) => (
-            <a
-              key={l.id}
-              href={l.href}
-              data-testid={`nav-link-${l.id}`}
-              className="text-sm font-semibold uppercase tracking-wider text-ink hover:text-coral transition-colors"
-            >
-              {l.label}
-            </a>
+            <NavItem key={l.id} l={l} testPrefix="nav-link" className="text-sm font-semibold uppercase tracking-wider text-ink hover:text-coral transition-colors" />
           ))}
         </nav>
 
@@ -77,7 +80,7 @@ export const Navbar = ({ t, lang, setLang }) => {
           </DropdownMenu>
 
           <a
-            href="#sedi"
+            href={`${home}#sedi`}
             data-testid="nav-order-cta"
             className="hidden sm:flex items-center gap-2 bg-coral text-ink border-2 border-ink rounded-full px-5 py-2 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
           >
@@ -99,15 +102,7 @@ export const Navbar = ({ t, lang, setLang }) => {
       {open && (
         <nav data-testid="mobile-menu" className="lg:hidden bg-cream border-t-2 border-ink px-6 py-4 flex flex-col gap-4">
           {links.map((l) => (
-            <a
-              key={l.id}
-              href={l.href}
-              data-testid={`mobile-nav-link-${l.id}`}
-              onClick={() => setOpen(false)}
-              className="font-display text-2xl text-ink hover:text-coral transition-colors"
-            >
-              {l.label}
-            </a>
+            <NavItem key={l.id} l={l} testPrefix="mobile-nav-link" className="font-display text-2xl text-ink hover:text-coral transition-colors" />
           ))}
         </nav>
       )}

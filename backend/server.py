@@ -12,7 +12,8 @@ from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+import asyncio
 from typing import Optional, Union
 import uuid
 from menu_data import MENU_SEED, MENU_VERSION
@@ -414,6 +415,174 @@ async def set_site_image(key: str, body: SiteImageUpdate, request: Request):
         raise HTTPException(status_code=422, detail="Tipo valore non valido per questa chiave")
     await db.site_images.update_one({"key": key}, {"$set": {"key": key, "value": body.value}}, upsert=True)
     return {"ok": True}
+
+
+# --- Reviews: admin-curated + Google Places (live, optional) ---
+REVIEW_SOURCES = {"google", "tripadvisor", "thefork", "facebook", "other"}
+GOOGLE_KEY = (os.environ.get("GOOGLE_PLACES_API_KEY") or "").strip()
+GOOGLE_FIELDS = "id,displayName,rating,userRatingCount,googleMapsUri,reviews.rating,reviews.text,reviews.originalText,reviews.relativePublishTimeDescription,reviews.authorAttribution,reviews.googleMapsUri,reviews.flagContentUri"
+GOOGLE_TTL = timedelta(minutes=30)
+_google_cache: dict[str, tuple[datetime, dict]] = {}
+
+
+class Review(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    author: str
+    rating: int = Field(ge=1, le=5)
+    text: str
+    location: str = "malaga"
+    source: str = "google"
+    date: str = ""
+    featured: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+class ReviewIn(BaseModel):
+    author: str
+    rating: int = Field(ge=1, le=5)
+    text: str
+    location: str = "malaga"
+    source: str = "google"
+    date: str = ""
+    featured: bool = False
+
+
+def validate_review(body: ReviewIn):
+    if body.location not in {"malaga", "malta"}:
+        raise HTTPException(status_code=422, detail="Sede non valida")
+    if body.source not in REVIEW_SOURCES:
+        raise HTTPException(status_code=422, detail="Fonte non valida")
+    if not body.author.strip() or not body.text.strip():
+        raise HTTPException(status_code=422, detail="Autore e testo sono obbligatori")
+
+
+@api_router.get("/reviews", response_model=list[Review])
+async def list_reviews():
+    docs = await db.reviews.find({}, {"_id": 0}).sort([("featured", -1), ("created_at", -1)]).to_list(500)
+    return docs
+
+
+@api_router.post("/admin/reviews", response_model=Review)
+async def create_review(body: ReviewIn, request: Request):
+    require_admin(request)
+    validate_review(body)
+    review = Review(**body.model_dump())
+    await db.reviews.insert_one(review.model_dump())
+    return review
+
+
+@api_router.put("/admin/reviews/{review_id}", response_model=Review)
+async def update_review(review_id: str, body: ReviewIn, request: Request):
+    require_admin(request)
+    validate_review(body)
+    existing = await db.reviews.find_one({"id": review_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Recensione non trovata")
+    updated = Review(**{**existing, **body.model_dump()})
+    await db.reviews.replace_one({"id": review_id}, updated.model_dump())
+    return updated
+
+
+@api_router.delete("/admin/reviews/{review_id}")
+async def delete_review(review_id: str, request: Request):
+    require_admin(request)
+    result = await db.reviews.delete_one({"id": review_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Recensione non trovata")
+    return {"ok": True}
+
+
+class GooglePlaces(BaseModel):
+    malaga: str = ""
+    malta: str = ""
+
+
+async def google_place_ids() -> dict:
+    doc = await db.settings.find_one({"_id": "google_places"}, {"_id": 0})
+    return doc or {"malaga": "", "malta": ""}
+
+
+def normalize_google(place: dict, location: str) -> dict:
+    return {
+        "location": location,
+        "name": (place.get("displayName") or {}).get("text"),
+        "rating": place.get("rating"),
+        "count": place.get("userRatingCount", 0),
+        "mapsUri": place.get("googleMapsUri"),
+        "reviews": [
+            {
+                "rating": r.get("rating"),
+                "text": (r.get("text") or r.get("originalText") or {}).get("text", ""),
+                "relativeTime": r.get("relativePublishTimeDescription"),
+                "author": (r.get("authorAttribution") or {}).get("displayName"),
+                "authorPhoto": (r.get("authorAttribution") or {}).get("photoUri"),
+                "authorUri": (r.get("authorAttribution") or {}).get("uri"),
+                "mapsUri": r.get("googleMapsUri"),
+                "flagUri": r.get("flagContentUri"),
+            }
+            for r in place.get("reviews", [])
+        ],
+    }
+
+
+async def fetch_google_place(place_id: str, location: str, lang: str) -> Optional[dict]:
+    cache_key = f"{place_id}:{lang}"
+    cached = _google_cache.get(cache_key)
+    if cached and datetime.now(timezone.utc) - cached[0] < GOOGLE_TTL:
+        return cached[1]
+    async with httpx.AsyncClient(timeout=10) as http:
+        resp = await http.get(f"https://places.googleapis.com/v1/places/{place_id}",
+                              headers={"X-Goog-Api-Key": GOOGLE_KEY, "X-Goog-FieldMask": GOOGLE_FIELDS},
+                              params={"languageCode": lang})
+    if resp.status_code >= 400:
+        logger.error(f"Google Places error {resp.status_code} for {location}")
+        return None
+    data = normalize_google(resp.json(), location)
+    _google_cache[cache_key] = (datetime.now(timezone.utc), data)
+    return data
+
+
+@api_router.get("/reviews/google")
+async def google_reviews(lang: str = "it"):
+    ids = await google_place_ids()
+    configured = {k: v for k, v in ids.items() if v}
+    if not GOOGLE_KEY or not configured:
+        return {"enabled": False, "places": []}
+    lang = lang if lang in {"it", "en", "es", "de", "fr", "pt"} else "it"
+    results = await asyncio.gather(*[fetch_google_place(pid, loc, lang) for loc, pid in configured.items()])
+    return {"enabled": True, "places": [r for r in results if r]}
+
+
+@api_router.get("/admin/google-places")
+async def get_google_places(request: Request):
+    require_admin(request)
+    return {"hasKey": bool(GOOGLE_KEY), "placeIds": await google_place_ids()}
+
+
+@api_router.put("/admin/google-places")
+async def set_google_places(body: GooglePlaces, request: Request):
+    require_admin(request)
+    await db.settings.update_one({"_id": "google_places"}, {"$set": body.model_dump()}, upsert=True)
+    _google_cache.clear()
+    return {"ok": True}
+
+
+class PlaceSearch(BaseModel):
+    query: str
+
+
+@api_router.post("/admin/google-places/search")
+async def search_google_places(body: PlaceSearch, request: Request):
+    require_admin(request)
+    if not GOOGLE_KEY:
+        raise HTTPException(status_code=409, detail="Chiave Google Places non configurata sul server")
+    async with httpx.AsyncClient(timeout=10) as http:
+        resp = await http.post("https://places.googleapis.com/v1/places:searchText",
+                               headers={"X-Goog-Api-Key": GOOGLE_KEY, "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress"},
+                               json={"textQuery": body.query})
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=502, detail="Ricerca Google non riuscita: verifica chiave e API abilitata")
+    return [{"id": p["id"], "name": (p.get("displayName") or {}).get("text"), "address": p.get("formattedAddress")} for p in resp.json().get("places", [])]
 
 
 app.include_router(api_router)

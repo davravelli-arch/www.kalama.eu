@@ -1,14 +1,16 @@
 import { useState } from "react";
 import axios from "axios";
-import { LogOut, ArrowLeft, UtensilsCrossed, Images, Eye, EyeOff } from "lucide-react";
+import { LogOut, ArrowLeft, UtensilsCrossed, Images, Eye, EyeOff, MessageSquareQuote } from "lucide-react";
 import { Logo } from "./Logo";
 import { API, TOKEN_KEY, Field, inputCls } from "./admin/ui";
 import { MenuManager } from "./admin/MenuManager";
 import { SitePhotos } from "./admin/SitePhotos";
+import { ReviewsManager } from "./admin/ReviewsManager";
 
 const TABS = [
   ["menu", "Menu", UtensilsCrossed],
   ["photos", "Foto del sito", Images],
+  ["reviews", "Recensioni", MessageSquareQuote],
 ];
 
 export default function Admin() {
@@ -104,7 +106,9 @@ export default function Admin() {
       </header>
 
       <main data-testid="admin-dashboard" className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
-        {tab === "menu" ? <MenuManager onUnauthorized={logout} /> : <SitePhotos onUnauthorized={logout} />}
+        {tab === "menu" && <MenuManager onUnauthorized={logout} />}
+        {tab === "photos" && <SitePhotos onUnauthorized={logout} />}
+        {tab === "reviews" && <ReviewsManager onUnauthorized={logout} />}
       </main>
     </div>
   );

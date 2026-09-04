@@ -1,0 +1,32 @@
+{
+  "summary": "Testing completo della feature Recensioni (backend + frontend). Backend: 24 test pytest su /api/reviews, /api/admin/reviews (CRUD, auth 401, validazioni 422, ordinamento featured/created_at), /api/reviews/google, /api/admin/google-places (GET/PUT/search 409) — 24/24 PASS. Frontend: home senza recensioni non renderizza reviews-section; dopo creazione di 2 recensioni la sezione home mostra solo la featured (1 card) e reviews-view-all porta a /recensioni; pagina /recensioni con 2 card, filtri malaga/malta/all corretti (1/1/2), google-reviews assente, back-home OK; navbar nav-link-reviews -> /recensioni e nav-link-menu href '/#menu' che riporta alla home su #menu; switch lingua EN su /recensioni -> titolo 'YOUR REVIEWS' + nav 'Reviews', localStorage kalama_lang=en persistente dopo navigazione a /. Admin: tab Recensioni, create/edit/delete con toast corretti ('Recensione pubblicata/aggiornata/eliminata'), stelle, select location/source, checkbox featured; GoogleSettings mostra 'CHIAVE API NON CONFIGURATA', save Place ID -> toast 'Sedi Google salvate', pulsante Cerca disabilitato. Regressione: home/hero, menu con selettore sedi, login admin OK. Nessun errore console. CLEANUP eseguito: GET /api/reviews = [] e google-places = {malaga:'', malta:''}.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/recensioni e sezione home", "issues": ["Le card recensione hanno offset verticali sfalsati (la 2a card parte ~20px piu' in basso): sembra voluto (stile 'sticker'), ma con sole 1-2 recensioni la griglia a 3 colonne lascia molto spazio vuoto a destra — valutare centratura o layout adattivo quando le recensioni sono <3"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_reviews.py",
+    "/app/test_reports/pytest/reviews_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "GOOGLE_PLACES_API_KEY viene letta a import-time (GOOGLE_KEY a livello modulo): quando la chiave verra' aggiunta in backend/.env sara' necessario un restart del backend (hasKey resta false fino al riavvio). Documentarlo o leggere la env dentro le funzioni.",
+    "GET /api/reviews usa to_list(500) senza paginazione: accettabile ora, ma prevedere limit/skip se il volume crescera'.",
+    "validate_review viene eseguita dopo require_admin: corretto; nota che i vincoli rating sono duplicati tra Pydantic (422) e validate_review — coerenti, nessun problema."
+  ],
+  "updated_files": ["/app/backend/tests/test_reviews.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Create temporaneamente 2 recensioni via API (TEST_Marco malaga featured, TEST_Anna malta) + 1 via UI admin (TEST_UI_Luca) + Place ID 'ChIJtest'/'ChIJuitest' — TUTTE eliminate/ripristinate nel cleanup finale (verificato: /api/reviews = [], placeIds vuoti).",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "test_credentials": "admin password da /app/memory/test_credentials.md (KalamaMare2026!) — login riuscito al primo tentativo, nessun tentativo errato usato (nessun rischio lockout).",
+  "context_for_next_testing_agent": "Feature Recensioni completamente verde (backend+frontend+admin). Suite riutilizzabile: /app/backend/tests/test_reviews.py (eseguire con: cd /app/backend && python -m pytest tests/test_reviews.py -p xdist -n0). Attenzione: il primo test assume /api/reviews vuoto — eseguire il cleanup prima. Google Places resta intenzionalmente disabilitato (nessuna chiave): /api/reviews/google -> {enabled:false, places:[]}. Per il titolo pagina usare confronto sul testo con whitespace normalizzato (Kinetic splitta le parole in span, quindi inner_text contiene newline).",
+  "rca_of_the_issue": "Nessun difetto riscontrato. Unico falso negativo nei miei test: match del titolo EN 'YOUR REVIEWS' via inner_text falliva per i newline inseriti dal componente Kinetic — verificato visivamente e con match parola per parola."
+}

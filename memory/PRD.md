@@ -33,6 +33,8 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 - P2: Link diretto Glovo Málaga (ora punta alla home Glovo Málaga, listing diretto non trovato pubblicamente)
 - P2: Il titolare carica dal pannello /admin → Foto del sito le foto reali per Chi Siamo, sede Málaga, sede Sliema, food truck (ora fallback foto Kalamà da myguide)
 - P2: Il titolare carica dal pannello /admin → Menu le foto dei piatti mancanti (ora placeholder con logo)
+- P1: Ricevere GOOGLE_PLACES_API_KEY dall'utente → aggiungere a backend/.env, restart backend, impostare Place ID dal pannello
+- P1: L'utente inserisce le prime recensioni curate dal pannello (DB reviews vuoto)
 - P2: Modifica orari/sedi anche dal pannello admin (ora solo menu)
 - P3: SEO multilingua (hreflang, meta per lingua), sitemap
 
@@ -44,3 +46,10 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 - Foto reali già caricate dal cliente: cono di calamari fritti (hero + Calamari fritti grandi in entrambe le sedi + galleria), calamari e gamberi alla griglia (spiedini calamari e gamberi + galleria).
 - Test: iteration_2 → 28 test backend + E2E frontend tutti verdi (/app/test_reports/iteration_2.json).
 - Nota: il video CCTV caricato (2024-08-25-15-43-14.mp4) non è stato usato, sembra un upload accidentale.
+
+## Aggiornamento 04/06/2026 — Recensioni clienti
+- Sezione "Dicono di noi" in home (nascosta finché non ci sono recensioni; mostra fino a 6 "in evidenza") + pagina `/recensioni` con tutte le recensioni e filtro per sede. Link "Recensioni" in navbar (route); gli anchor della navbar diventano `/#sezione` fuori dalla home. Lingua ora globale in App con persistenza `localStorage.kalama_lang`.
+- Admin tab "Recensioni": CRUD recensioni curate (autore, stelle, testo, sede, fonte Google/TripAdvisor/TheFork/Facebook/altro, data, in evidenza). Collection `reviews`.
+- Google Reviews automatiche (Places API New): endpoint `GET /api/reviews/google?lang=` con cache in memoria 30 min, attivo solo se `GOOGLE_PLACES_API_KEY` è in backend/.env e i Place ID sono salvati dal pannello (sezione "Google Reviews (automatiche)", con ricerca Place ID). Limite Google: 5 recensioni per sede in ordine di rilevanza. Card con attribuzione autore, link Google Maps e "Segnala" come richiesto dalle policy Google. STATO: chiave NON ancora fornita dall'utente → sezione Google disattivata (enabled:false), il resto funziona.
+- Test: iteration_4 → 24 test backend + E2E frontend/admin tutti verdi.
+- Login admin: aggiunti toggle mostra/nascondi password e trim (iteration_3 verde); l'utente aveva sbagliato la digitazione.

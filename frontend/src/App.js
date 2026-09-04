@@ -17,11 +17,11 @@ import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import Admin from "@/components/Admin";
+import ReviewsPage from "@/components/ReviewsPage";
+import { Reviews } from "@/components/Reviews";
 
-function Landing() {
-  const [lang, setLang] = useState("it");
+function Landing({ t, lang, setLang }) {
   const [images, setImages] = useState({});
-  const t = translations[lang];
 
   useEffect(() => {
     const lenis = new Lenis({ autoRaf: true });
@@ -49,6 +49,7 @@ function Landing() {
         <MenuSection t={t} lang={lang} />
         <Locations t={t} lang={lang} images={images} />
         <Gallery t={t} images={images.gallery} />
+        <Reviews t={t} />
         <Franchising t={t} />
         <Contact t={t} />
       </main>
@@ -59,10 +60,14 @@ function Landing() {
 }
 
 function App() {
+  const [lang, setLangState] = useState(() => localStorage.getItem("kalama_lang") || "it");
+  const setLang = (l) => { localStorage.setItem("kalama_lang", l); setLangState(l); };
+  const t = translations[lang];
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Landing t={t} lang={lang} setLang={setLang} />} />
+        <Route path="/recensioni" element={<ReviewsPage t={t} lang={lang} setLang={setLang} />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
       <Toaster position="bottom-left" richColors />
