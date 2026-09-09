@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter, UploadFile, File
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,6 +17,9 @@ import asyncio
 from typing import Optional, Union
 import uuid
 from menu_data import MENU_SEED, MENU_VERSION
+from booking import SITES, TableRequestIn, TableRequest, StatusUpdate, ChatIn, request_rows, whatsapp_url, time_slots, build_system_prompt
+from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
+import json
 import hmac
 import jwt
 from datetime import datetime, timezone, timedelta
@@ -142,8 +145,9 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: str | None =
     return resp.json().get("id")
 
 
-async def notify_owner(subject: str, rows: list[tuple[str, str]]):
-    if not (NOTIFY_EMAIL and EMAIL_KEY):
+async def notify_owner(subject: str, rows: list[tuple[str, str]], to: str | None = None):
+    recipient = to or NOTIFY_EMAIL
+    if not (recipient and EMAIL_KEY):
         return
     try:
         body_rows = "".join(
@@ -151,12 +155,12 @@ async def notify_owner(subject: str, rows: list[tuple[str, str]]):
         )
         html = (
             '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif">'
-            f'<h2 style="color:#0A192F;margin:0 0 16px">{escape(subject)}</h2>'
+            f'<h2 style="color:#1D1D1B;margin:0 0 16px">{escape(subject)}</h2>'
             f"{body_rows}"
             '<p style="font-size:12px;color:#888;margin-top:24px">Inviato automaticamente dal sito kalama.eu</p>'
             "</td></tr></table>"
         )
-        await send_email(to=NOTIFY_EMAIL, subject=subject, html=html)
+        await send_email(to=recipient, subject=subject, html=html)
     except Exception as e:
         logger.error(f"Email notification failed: {e}")
 
@@ -583,6 +587,104 @@ async def search_google_places(body: PlaceSearch, request: Request):
     if resp.status_code >= 400:
         raise HTTPException(status_code=502, detail="Ricerca Google non riuscita: verifica chiave e API abilitata")
     return [{"id": p["id"], "name": (p.get("displayName") or {}).get("text"), "address": p.get("formattedAddress")} for p in resp.json().get("places", [])]
+
+
+# --- Table requests ---
+@api_router.get("/table-requests/slots")
+async def get_slots(site: str, date: str):
+    if site not in SITES:
+        raise HTTPException(status_code=422, detail="Sede non valida")
+    try:
+        return time_slots(site, date)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Data non valida")
+
+
+@api_router.post("/table-requests")
+async def create_table_request(body: TableRequestIn):
+    req = TableRequest(**body.model_dump())
+    await db.table_requests.insert_one(req.model_dump())
+    site = SITES[req.site]
+    asyncio.create_task(notify_owner(
+        f"Richiesta tavolo {site['name']} — {req.date} {req.time} · {req.guests} pers.",
+        request_rows(req), to=site["email"],
+    ))
+    return {"id": req.id, "whatsapp_url": whatsapp_url(req), "site_email": site["email"]}
+
+
+@api_router.get("/admin/table-requests")
+async def list_table_requests(request: Request):
+    require_admin(request)
+    return await db.table_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+
+
+@api_router.patch("/admin/table-requests/{req_id}")
+async def update_table_request(req_id: str, body: StatusUpdate, request: Request):
+    require_admin(request)
+    result = await db.table_requests.update_one({"id": req_id}, {"$set": {"status": body.status}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Richiesta non trovata")
+    return {"ok": True}
+
+
+@api_router.delete("/admin/table-requests/{req_id}")
+async def delete_table_request(req_id: str, request: Request):
+    require_admin(request)
+    result = await db.table_requests.delete_one({"id": req_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Richiesta non trovata")
+    return {"ok": True}
+
+
+# --- AI assistant (GPT-5.4 mini via Emergent LLM key) ---
+CHAT_MODEL = ("openai", "gpt-5.4-mini")
+CHAT_HISTORY_LIMIT = 16
+
+
+@api_router.post("/chat")
+async def chat(body: ChatIn):
+    if body.site not in SITES:
+        raise HTTPException(status_code=422, detail="Sede non valida")
+    if not EMERGENT_KEY:
+        raise HTTPException(status_code=503, detail="Assistente non disponibile")
+    menu_items = await db.menu_items.find({"location": body.site}, {"_id": 0}).to_list(300)
+    history_docs = await db.chat_messages.find({"session_id": body.session_id}, {"_id": 0, "role": 1, "content": 1}) \
+        .sort("created_at", -1).limit(CHAT_HISTORY_LIMIT).to_list(CHAT_HISTORY_LIMIT)
+    history = [{"role": d["role"], "content": d["content"]} for d in reversed(history_docs)]
+    system = build_system_prompt(body.site, body.lang, menu_items)
+    llm = LlmChat(api_key=EMERGENT_KEY, session_id=body.session_id, system_message=system,
+                  initial_messages=[{"role": "system", "content": system}, *history]).with_model(*CHAT_MODEL)
+    now = datetime.now(timezone.utc).isoformat()
+    await db.chat_messages.insert_one({"id": str(uuid.uuid4()), "session_id": body.session_id, "role": "user",
+                                       "content": body.message, "site": body.site, "created_at": now})
+
+    async def stream():
+        full = []
+        try:
+            async for ev in llm.stream_message(UserMessage(text=body.message)):
+                if isinstance(ev, TextDelta):
+                    full.append(ev.content)
+                    yield f"data: {json.dumps({'delta': ev.content})}\n\n"
+                elif isinstance(ev, StreamDone):
+                    break
+        except Exception as e:
+            logger.error(f"Chat stream failed: {e}")
+            yield f"data: {json.dumps({'error': 'assistant_unavailable'})}\n\n"
+        text = "".join(full)
+        if text:
+            await db.chat_messages.insert_one({"id": str(uuid.uuid4()), "session_id": body.session_id, "role": "assistant",
+                                               "content": text, "site": body.site, "created_at": datetime.now(timezone.utc).isoformat()})
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@api_router.get("/chat/{session_id}")
+async def chat_history(session_id: str):
+    docs = await db.chat_messages.find({"session_id": session_id}, {"_id": 0, "role": 1, "content": 1, "created_at": 1}) \
+        .sort("created_at", 1).to_list(200)
+    return docs
 
 
 app.include_router(api_router)

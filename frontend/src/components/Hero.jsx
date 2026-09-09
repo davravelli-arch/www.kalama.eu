@@ -1,12 +1,16 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Phone, ArrowDown } from "lucide-react";
+import { Phone, ArrowDown, MapPin, ShoppingBag } from "lucide-react";
 import { imgUrl } from "../lib/img";
+import { useSite, siteLocation, SITE_NAME } from "../lib/site";
 
 const EASE = [0.22, 1, 0.36, 1];
 
 const DEFAULT_IMG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-1-7495721.jpg";
 
 export const Hero = ({ t, image }) => {
+  const { site } = useSite();
+  const loc = siteLocation(site);
+  const delivery = loc.actions.find((a) => a.kind === "order") || loc.actions[0];
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 900], [0, 180]);
   const colors = ["text-cream", "text-coral", "text-lemon"];
@@ -32,6 +36,11 @@ export const Hero = ({ t, image }) => {
         >
           {t.hero.badge}
         </motion.span>
+        {site && (
+          <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} data-testid="hero-site-badge" className="inline-flex items-center gap-2 ml-3 bg-ink text-lemon border-2 border-lemon rounded-full px-5 py-2 text-xs font-bold uppercase tracking-widest shadow-hard-sm">
+            <MapPin className="w-3.5 h-3.5" /> {SITE_NAME[site]}
+          </motion.span>
+        )}
 
         <h1 className="font-display leading-[0.88] mt-8 text-7xl sm:text-8xl lg:text-[11rem]">
           {t.hero.titles.map((line, i) => (
@@ -55,8 +64,15 @@ export const Hero = ({ t, image }) => {
           data-testid="hero-subtitle"
           className="text-cream/90 text-base sm:text-lg max-w-xl mt-6 font-medium"
         >
-          {t.hero.subtitle}
+          {site ? t.site.heroSub[site] : t.hero.subtitle}
         </motion.p>
+        {site && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.95 }} data-testid="hero-delivery" className="inline-flex items-center gap-3 mt-5 bg-white/95 border-2 border-ink rounded-2xl px-4 py-2 shadow-hard-sm">
+            <ShoppingBag className="w-5 h-5 text-ink" />
+            <span className="text-[11px] font-bold uppercase tracking-widest text-ink/60">{t.site.delivery}</span>
+            <a href={delivery.url} target="_blank" rel="noreferrer" data-testid="hero-delivery-link" className="bg-lemon border-2 border-ink rounded-full px-3 py-0.5 text-xs font-bold text-ink">{delivery.label}</a>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}

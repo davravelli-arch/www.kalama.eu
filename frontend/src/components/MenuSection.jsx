@@ -4,6 +4,7 @@ import axios from "axios";
 import { MapPin } from "lucide-react";
 import { KineticLines } from "./Kinetic";
 import { imgUrl, ALL_CATEGORIES, DRINK_CATEGORIES, LOCATIONS } from "../lib/img";
+import { useSite } from "../lib/site";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -59,7 +60,9 @@ const DrinkRow = ({ item, t, field }) => (
 
 export const MenuSection = ({ t, lang }) => {
   const [items, setItems] = useState([]);
-  const [loc, setLoc] = useState("malaga");
+  const { site } = useSite();
+  const [loc, setLoc] = useState(site || "malaga");
+  useEffect(() => { if (site) { setLoc(site); setFilter("all"); } }, [site]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 

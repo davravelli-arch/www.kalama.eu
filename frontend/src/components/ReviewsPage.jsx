@@ -4,7 +4,6 @@ import axios from "axios";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
-import { WhatsAppFloat } from "./WhatsAppFloat";
 import { KineticLines } from "./Kinetic";
 import { ReviewCard, GoogleReviewCard, Stars } from "./ReviewCard";
 import { LOCATIONS } from "../lib/img";
@@ -54,8 +53,8 @@ export default function ReviewsPage({ t, lang, setLang }) {
   const list = (reviews || []).filter((r) => loc === "all" || r.location === loc);
 
   return (
-    <div className="App font-body bg-cream text-ink min-h-screen">
-      <Navbar t={t} lang={lang} setLang={setLang} />
+    <div className="App font-body bg-cream text-ink min-h-screen pb-16 lg:pb-0">
+      <Navbar />
       <main data-testid="reviews-page" className="pt-28 sm:pt-36 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <Link to="/" data-testid="reviews-back-home" className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-ink/60 hover:text-ocean transition-colors">
@@ -92,7 +91,6 @@ export default function ReviewsPage({ t, lang, setLang }) {
         </div>
       </main>
       <Footer t={t} />
-      <WhatsAppFloat t={t} />
     </div>
   );
 }

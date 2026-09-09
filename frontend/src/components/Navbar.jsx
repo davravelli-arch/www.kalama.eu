@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Globe, Phone, Menu as MenuIcon, X } from "lucide-react";
+import { Globe, CalendarDays, Menu as MenuIcon, MapPin } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -8,6 +8,8 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 import { Logo } from "./Logo";
+import { SiteDrawer } from "./SiteDrawer";
+import { useSite } from "../lib/site";
 
 const LANGS = [
   ["it", "Italiano"],
@@ -18,7 +20,8 @@ const LANGS = [
   ["pt", "Português"],
 ];
 
-export const Navbar = ({ t, lang, setLang }) => {
+export const Navbar = () => {
+  const { t, lang, setLang, site, setSite, openBooking } = useSite();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const home = pathname === "/" ? "" : "/";
@@ -33,79 +36,70 @@ export const Navbar = ({ t, lang, setLang }) => {
   ];
   const NavItem = ({ l, className, testPrefix }) =>
     l.route ? (
-      <Link to={l.href} data-testid={`${testPrefix}-${l.id}`} onClick={() => setOpen(false)} className={className}>{l.label}</Link>
+      <Link to={l.href} data-testid={`${testPrefix}-${l.id}`} className={className}>{l.label}</Link>
     ) : (
-      <a href={l.href} data-testid={`${testPrefix}-${l.id}`} onClick={() => setOpen(false)} className={className}>{l.label}</a>
+      <a href={l.href} data-testid={`${testPrefix}-${l.id}`} className={className}>{l.label}</a>
     );
 
   return (
-    <header
-      data-testid="main-navbar"
-      className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-2 border-ink"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-        <a href={`${home}#top`} data-testid="nav-logo" className="flex items-center">
+    <header data-testid="main-navbar" className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b-2 border-ink">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-3">
+        <a href={`${home}#top`} data-testid="nav-logo" className="flex items-center shrink-0">
           <Logo variant="dark" className="h-9 sm:h-10" testId="nav-logo-img" />
         </a>
 
-        <nav className="hidden lg:flex items-center gap-7">
+        <nav className="hidden xl:flex items-center gap-5">
           {links.map((l) => (
-            <NavItem key={l.id} l={l} testPrefix="nav-link" className="text-sm font-semibold uppercase tracking-wider text-ink hover:text-coral transition-colors" />
+            <NavItem key={l.id} l={l} testPrefix="nav-link" className="text-[13px] whitespace-nowrap font-semibold uppercase tracking-wider text-ink hover:text-coral transition-colors" />
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {site && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button data-testid="site-switcher" className="hidden sm:flex items-center gap-1.5 whitespace-nowrap border-2 border-ink rounded-full px-3 py-1.5 bg-white font-bold text-xs uppercase shadow-hard-sm btn-lift">
+                  <MapPin className="w-4 h-4" /> {t.menu.locations[site]}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="border-2 border-ink">
+                {["malaga", "malta"].map((s) => (
+                  <DropdownMenuItem key={s} data-testid={`site-option-${s}`} onClick={() => setSite(s)} className={`font-semibold cursor-pointer ${site === s ? "text-coral" : ""}`}>
+                    {t.menu.locations[s]}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
-                data-testid="lang-switcher"
-                className="flex items-center gap-1.5 border-2 border-ink rounded-full px-3 py-1.5 bg-lemon font-bold text-xs uppercase shadow-hard-sm btn-lift"
-              >
+              <button data-testid="lang-switcher" className="flex items-center gap-1.5 border-2 border-ink rounded-full px-3 py-1.5 bg-lemon font-bold text-xs uppercase shadow-hard-sm btn-lift">
                 <Globe className="w-4 h-4" />
                 {lang}
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="border-2 border-ink">
               {LANGS.map(([code, label]) => (
-                <DropdownMenuItem
-                  key={code}
-                  data-testid={`lang-option-${code}`}
-                  onClick={() => setLang(code)}
-                  className={`font-semibold cursor-pointer ${lang === code ? "text-coral" : ""}`}
-                >
+                <DropdownMenuItem key={code} data-testid={`lang-option-${code}`} onClick={() => setLang(code)} className={`font-semibold cursor-pointer ${lang === code ? "text-coral" : ""}`}>
                   {label}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <a
-            href={`${home}#sedi`}
-            data-testid="nav-order-cta"
-            className="hidden sm:flex items-center gap-2 bg-coral text-ink border-2 border-ink rounded-full px-5 py-2 font-bold text-sm uppercase tracking-wide shadow-hard-sm btn-lift"
-          >
-            <Phone className="w-4 h-4" />
-            {t.nav.order}
-          </a>
+          <button onClick={openBooking} data-testid="nav-book-cta" className="hidden md:flex items-center gap-2 whitespace-nowrap bg-coral text-ink border-2 border-ink rounded-full px-4 py-2 font-bold text-xs uppercase tracking-wide shadow-hard-sm btn-lift">
+            <CalendarDays className="w-4 h-4" />
+            {t.site.bookTable}
+          </button>
 
-          <button
-            data-testid="mobile-menu-toggle"
-            className="lg:hidden border-2 border-ink rounded-full p-2 bg-white"
-            onClick={() => setOpen(!open)}
-            aria-label="Menu"
-          >
-            {open ? <X className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
+          <button data-testid="mobile-menu-toggle" className="border-2 border-ink rounded-full p-2 bg-white btn-lift" onClick={() => setOpen(true)} aria-label="Menu">
+            <MenuIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {open && (
-        <nav data-testid="mobile-menu" className="lg:hidden bg-cream border-t-2 border-ink px-6 py-4 flex flex-col gap-4">
-          {links.map((l) => (
-            <NavItem key={l.id} l={l} testPrefix="mobile-nav-link" className="font-display text-2xl text-ink hover:text-coral transition-colors" />
-          ))}
-        </nav>
-      )}
+      <SiteDrawer open={open} onClose={() => setOpen(false)} links={links} />
     </header>
   );
 };
