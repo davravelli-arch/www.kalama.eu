@@ -17,7 +17,7 @@ import asyncio
 from typing import Optional, Union
 import uuid
 from menu_data import MENU_SEED, MENU_VERSION
-from booking import SITES, TableRequestIn, TableRequest, StatusUpdate, ChatIn, request_rows, whatsapp_url, time_slots, build_system_prompt
+from booking import SITES, TableRequestIn, TableRequest, StatusUpdate, ChatIn, request_rows, whatsapp_url, time_slots, build_system_prompt, guest_email
 from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
 import json
 import hmac
@@ -621,10 +621,22 @@ async def list_table_requests(request: Request):
 @api_router.patch("/admin/table-requests/{req_id}")
 async def update_table_request(req_id: str, body: StatusUpdate, request: Request):
     require_admin(request)
-    result = await db.table_requests.update_one({"id": req_id}, {"$set": {"status": body.status}})
-    if result.matched_count == 0:
+    req = await db.table_requests.find_one({"id": req_id}, {"_id": 0})
+    if not req:
         raise HTTPException(status_code=404, detail="Richiesta non trovata")
-    return {"ok": True}
+    update = {"status": body.status}
+    notified = False
+    if body.status in {"confirmed", "declined"} and EMAIL_KEY:
+        subject, html = guest_email(req, body.status)
+        try:
+            await send_email(to=req["email"], subject=subject, html=html, reply_to=SITES[req["site"]]["email"])
+            update["guest_notified_at"] = datetime.now(timezone.utc).isoformat()
+            update["guest_notified_status"] = body.status
+            notified = True
+        except Exception as e:
+            logger.error(f"Guest email failed: {e}")
+    await db.table_requests.update_one({"id": req_id}, {"$set": update})
+    return {"ok": True, "guest_notified": notified}
 
 
 @api_router.delete("/admin/table-requests/{req_id}")

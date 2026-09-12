@@ -62,3 +62,8 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 - Lingua e sede gestite in `App.js` via `SiteContext` (`/app/frontend/src/lib/site.js`). 6 lingue aggiornate (blocchi `site`, `booking`, `chat`, `cookie`).
 - Test: iteration_5 → 26 backend + E2E frontend tutti verdi. Fix post-test: guard su race in ChatAssistant (refetch cronologia durante stream).
 - NON fatto (scelta utente): restyling grafico serif del video; recensioni Google live ancora in attesa della chiave API.
+
+## Aggiornamento 12/06/2026 — Conferma con un tap
+- PATCH /api/admin/table-requests/{id} con status confirmed|declined invia email al cliente nella sua lingua (template `GUEST_MAIL` in booking.py, 6 lingue; rifiuto con link WhatsApp sede), reply-to = email sede; salva `guest_notified_at`/`guest_notified_status`; ritorna `guest_notified`. Provider blocca destinatari non raggiungibili (422) → backend logga, stato aggiornato comunque, toast warning in admin. Badge "Cliente avvisato" nel tab Prenotazioni.
+- Test: iteration_6 → 8 backend + E2E admin verdi.
+- In attesa dell'utente: chiave Google Places, foto reali sedi (da caricare in admin → Foto del sito → sede Málaga/Sliema: alimentano anche la schermata di scelta sede), testi delle recensioni preferite (non inventare recensioni).

@@ -20,8 +20,9 @@ export const BookingsManager = ({ onUnauthorized }) => {
 
   const setStatus = async (id, status) => {
     try {
-      await axios.patch(`${API}/admin/table-requests/${id}`, { status }, authHeaders());
-      toast.success(`Richiesta ${STATUS[status][0].toLowerCase()}`);
+      const { data } = await axios.patch(`${API}/admin/table-requests/${id}`, { status }, authHeaders());
+      if (data.guest_notified) toast.success(`Richiesta ${STATUS[status][0].toLowerCase()} · email inviata al cliente`);
+      else toast.warning(`Richiesta ${STATUS[status][0].toLowerCase()} · email al cliente non inviata (indirizzo non raggiungibile)`);
       load();
     } catch { toast.error("Errore nell'aggiornamento"); }
   };
@@ -43,7 +44,7 @@ export const BookingsManager = ({ onUnauthorized }) => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="font-display text-5xl text-ink tracking-wide">RICHIESTE TAVOLO</h2>
-          <p className="text-ink/60 font-medium mt-1">{list.filter((r) => r.status === "new").length} nuove · {list.length} totali. Ogni richiesta arriva anche via email alla sede.</p>
+          <p className="text-ink/60 font-medium mt-1">{list.filter((r) => r.status === "new").length} nuove · {list.length} totali. Confermando o rifiutando, il cliente riceve subito un'email nella sua lingua.</p>
         </div>
         <div data-testid="admin-bookings-filter" className="inline-flex border-2 border-ink rounded-full bg-white p-1 shadow-hard-sm">
           {["all", "new", "confirmed", "declined"].map((s) => (
@@ -61,7 +62,8 @@ export const BookingsManager = ({ onUnauthorized }) => {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`text-[11px] font-bold uppercase tracking-widest border-2 border-ink rounded-full px-2.5 py-0.5 ${STATUS[r.status][1]}`}>{STATUS[r.status][0]}</span>
-                <span className="text-[11px] font-bold uppercase tracking-widest text-ink/50">{SITE[r.site]}</span>
+                <span className="text-[11px] font-bold uppercase tracking-widest text-ink/50">{SITE[r.site]} · {r.lang?.toUpperCase()}</span>
+                {r.guest_notified_at && <span data-testid={`admin-booking-notified-${r.id}`} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-ocean"><Mail className="w-3 h-3" /> Cliente avvisato</span>}
               </div>
               <p className="font-display text-3xl text-ink tracking-wide mt-1">{r.date} · {r.time} · {r.guests} pers.</p>
               <p className="font-bold text-ink">{r.name} <span className="text-ink/40 font-medium">· {ZONE[r.zone]}{r.occasion ? ` · ${OCC[r.occasion]}` : ""}{r.accessibility ? " · accesso agevolato" : ""}</span></p>

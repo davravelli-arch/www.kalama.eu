@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone
+from html import escape
 from typing import Optional
 from urllib.parse import quote
 import uuid
@@ -141,6 +142,41 @@ class StatusUpdate(BaseModel):
         if v not in STATUSES:
             raise ValueError("Stato non valido")
         return v
+
+
+GUEST_MAIL = {
+    "it": dict(confirmed_subject="Tavolo confermato · {site}", confirmed="Ciao {name}, il tuo tavolo è confermato!", declined_subject="Richiesta tavolo · {site}", declined="Ciao {name}, purtroppo non possiamo confermare il tavolo richiesto.", details="Dettagli della richiesta", date="Data", time="Ora", guests="Coperti", notes="Note", alt="Scrivici su WhatsApp per trovare insieme un'alternativa:", see="Ti aspettiamo! Indicazioni:", footer="Kalamà · The real fish street food"),
+    "en": dict(confirmed_subject="Table confirmed · {site}", confirmed="Hi {name}, your table is confirmed!", declined_subject="Table request · {site}", declined="Hi {name}, unfortunately we can't confirm the requested table.", details="Request details", date="Date", time="Time", guests="Guests", notes="Notes", alt="Message us on WhatsApp to find an alternative together:", see="See you soon! Directions:", footer="Kalamà · The real fish street food"),
+    "es": dict(confirmed_subject="Mesa confirmada · {site}", confirmed="Hola {name}, ¡tu mesa está confirmada!", declined_subject="Solicitud de mesa · {site}", declined="Hola {name}, lamentablemente no podemos confirmar la mesa solicitada.", details="Detalles de la solicitud", date="Fecha", time="Hora", guests="Comensales", notes="Notas", alt="Escríbenos por WhatsApp para buscar juntos una alternativa:", see="¡Te esperamos! Cómo llegar:", footer="Kalamà · The real fish street food"),
+    "de": dict(confirmed_subject="Tisch bestätigt · {site}", confirmed="Hallo {name}, dein Tisch ist bestätigt!", declined_subject="Tischanfrage · {site}", declined="Hallo {name}, leider können wir den angefragten Tisch nicht bestätigen.", details="Details der Anfrage", date="Datum", time="Uhrzeit", guests="Personen", notes="Hinweise", alt="Schreib uns per WhatsApp, um gemeinsam eine Alternative zu finden:", see="Wir freuen uns auf dich! Anfahrt:", footer="Kalamà · The real fish street food"),
+    "fr": dict(confirmed_subject="Table confirmée · {site}", confirmed="Bonjour {name}, votre table est confirmée !", declined_subject="Demande de table · {site}", declined="Bonjour {name}, malheureusement nous ne pouvons pas confirmer la table demandée.", details="Détails de la demande", date="Date", time="Heure", guests="Couverts", notes="Notes", alt="Écrivez-nous sur WhatsApp pour trouver une alternative ensemble :", see="À très vite ! Itinéraire :", footer="Kalamà · The real fish street food"),
+    "pt": dict(confirmed_subject="Mesa confirmada · {site}", confirmed="Olá {name}, a tua mesa está confirmada!", declined_subject="Pedido de mesa · {site}", declined="Olá {name}, infelizmente não conseguimos confirmar a mesa pedida.", details="Detalhes do pedido", date="Data", time="Hora", guests="Pessoas", notes="Notas", alt="Escreve-nos no WhatsApp para encontrarmos juntos uma alternativa:", see="Até já! Como chegar:", footer="Kalamà · The real fish street food"),
+}
+
+
+def guest_email(r: dict, status: str) -> tuple[str, str]:
+    m = GUEST_MAIL.get(r.get("lang"), GUEST_MAIL["en"])
+    site = SITES[r["site"]]
+    subject = m[f"{status}_subject"].format(site=site["name"])
+    intro = m[status].format(name=escape(r["name"]))
+    rows = [(m["date"], r["date"]), (m["time"], r["time"]), (m["guests"], str(r["guests"]))]
+    if r.get("notes"):
+        rows.append((m["notes"], r["notes"]))
+    rows_html = "".join(f'<tr><td style="padding:6px 12px 6px 0;color:#666">{escape(k)}</td><td style="padding:6px 0;font-weight:bold">{escape(v)}</td></tr>' for k, v in rows)
+    wa = f"https://wa.me/{site['whatsapp']}"
+    cta = (f'<p style="margin:20px 0 6px">{m["see"]}</p><a href="{site["maps"]}" style="display:inline-block;background:#FCC617;color:#1D1D1B;font-weight:bold;padding:12px 22px;border-radius:999px;text-decoration:none;border:2px solid #1D1D1B">{escape(site["address"])}</a>'
+           if status == "confirmed" else
+           f'<p style="margin:20px 0 6px">{m["alt"]}</p><a href="{wa}" style="display:inline-block;background:#25D366;color:#fff;font-weight:bold;padding:12px 22px;border-radius:999px;text-decoration:none;border:2px solid #1D1D1B">WhatsApp {escape(site["phone"])}</a>')
+    html = (
+        '<table role="presentation" width="100%" style="font-family:Arial,sans-serif;color:#1D1D1B"><tr><td style="padding:28px">'
+        f'<h2 style="margin:0 0 6px;color:#1D1D1B">{escape(site["name"])}</h2>'
+        f'<p style="font-size:18px;margin:0 0 18px">{intro}</p>'
+        f'<p style="font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin:0 0 4px">{m["details"]}</p>'
+        f'<table style="border-collapse:collapse">{rows_html}</table>{cta}'
+        f'<p style="font-size:12px;color:#888;margin-top:28px">{m["footer"]} · {escape(site["address"])} · {escape(site["phone"])}</p>'
+        "</td></tr></table>"
+    )
+    return subject, html
 
 
 class ChatIn(BaseModel):

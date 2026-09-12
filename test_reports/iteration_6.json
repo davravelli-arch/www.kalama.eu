@@ -1,0 +1,28 @@
+{
+  "summary": "Tested 'Conferma con un tap' end-to-end. Backend: 8/8 pytest passed (auth 401, 404, 422, confirm/decline send email + persist guest_notified_at/status, status='new' does NOT re-notify nor touch fields, unreachable email returns guest_notified:false without failing, DELETE cleanup ok). Frontend: admin login → tab Prenotazioni → row shows lang badge (ES) and 'Cliente avvisato' badge after confirming a delivered@resend.dev request; confirm on qa@example.com correctly leaves badge absent. One functional deviation from spec found in the toast copy for the unreachable case (see frontend_issues).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "BookingsManager.jsx", "issue": "When guest_notified=false (email al cliente non inviata) the frontend still calls toast.success with generic text 'Richiesta confermata/rifiutata' — no warning-style toast and no explicit 'email al cliente non inviata' message. Spec expects toast.warning('email al cliente non inviata'). Fix: use toast.warning with dedicated copy in the else branch of setStatus.", "selector": "BookingsManager.jsx line 24", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_booking_confirm.py", "/app/test_reports/pytest/booking_confirm_results.xml"],
+  "action_items": [
+    "In /app/frontend/src/components/admin/BookingsManager.jsx setStatus: when data.guest_notified is false and status is in {confirmed, declined}, show toast.warning('Richiesta <status> · email al cliente non inviata') instead of toast.success. Import toast.warning from sonner (already exported)."
+  ],
+  "critical_code_review_comments": [
+    "server.py update_table_request: notified fields are only set when EMAIL_KEY is present; if key missing, PATCH silently returns guest_notified:false. OK for now but consider surfacing a distinct flag if the sender is disabled vs. rejected by provider.",
+    "server.py: guest_email(r,'new') is not called because branch is guarded by status ∈ {confirmed,declined}, so status='new' correctly leaves guest_notified_at intact — verified.",
+    "BookingsManager.jsx duplicates STATUS map keys with frontend labels; consider moving labels to shared i18n bundle for consistency with 6-language backend."
+  ],
+  "updated_files": ["/app/backend/tests/test_booking_confirm.py"],
+  "success_rate": {"backend": "100%", "frontend": "90%"},
+  "test_credentials": "Admin password from /app/memory/test_credentials.md: KalamaMare2026!",
+  "seed_data_creation": "Seeded 3 table_requests directly in Mongo for backend tests (deleted via DELETE endpoint in cleanup test) + 2 additional rows for the Playwright UI test (delivered@resend.dev/es and qa@example.com/de), both deleted via DELETE /api/admin/table-requests/{id} after run. No leftover TEST_ rows in DB.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend feature is complete and correct. Only remaining fix is UI toast copy for the failed-email case in BookingsManager.jsx (see action_items). Do not exceed 4 PATCH-that-send-email per iteration when re-testing (provider rate).",
+  "rca of the issue": "Frontend toast: setStatus uses a single toast.success call with a ternary — when guest_notified is false the alternative copy simply omits the '· email inviata al cliente' suffix instead of switching to toast.warning with an explicit 'email al cliente non inviata' message. Fix by introducing an else branch that calls toast.warning('… email al cliente non inviata')."
+}
