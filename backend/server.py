@@ -17,7 +17,8 @@ import asyncio
 from typing import Optional, Union
 import uuid
 from menu_data import MENU_SEED, MENU_VERSION
-from booking import SITES, TableRequestIn, TableRequest, StatusUpdate, ChatIn, request_rows, whatsapp_url, time_slots, build_system_prompt, guest_email
+from booking import SITES, TableRequestIn, TableRequest, StatusUpdate, ChatIn, request_rows, whatsapp_url, time_slots, build_system_prompt, guest_email, reminder_email
+from zoneinfo import ZoneInfo
 from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
 import json
 import hmac
@@ -314,6 +315,7 @@ async def seed_menu():
         await init_storage()
     except Exception as e:
         logger.error(f"Storage init failed: {e}")
+    asyncio.create_task(reminder_loop())
 
 
 # --- Object storage (Emergent managed) & site images ---
@@ -646,6 +648,63 @@ async def delete_table_request(req_id: str, request: Request):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Richiesta non trovata")
     return {"ok": True}
+
+
+# --- Reminder emails (morning of a confirmed table) ---
+LOCAL_TZ = ZoneInfo("Europe/Madrid")
+REMINDER_HOUR = 9
+
+
+async def send_reminder(req: dict) -> bool:
+    if not EMAIL_KEY:
+        return False
+    subject, html = reminder_email(req)
+    try:
+        await send_email(to=req["email"], subject=subject, html=html, reply_to=SITES[req["site"]]["email"])
+    except Exception as e:
+        logger.error(f"Reminder email failed for {req['id']}: {e}")
+        return False
+    await db.table_requests.update_one({"id": req["id"]}, {"$set": {"reminder_sent_at": datetime.now(timezone.utc).isoformat()}})
+    return True
+
+
+async def run_reminders() -> int:
+    now = datetime.now(LOCAL_TZ)
+    if now.hour < REMINDER_HOUR:
+        return 0
+    due = await db.table_requests.find(
+        {"status": "confirmed", "date": now.date().isoformat(), "reminder_sent_at": {"$exists": False}}, {"_id": 0}
+    ).to_list(200)
+    sent = 0
+    for req in due:
+        sent += await send_reminder(req)
+    return sent
+
+
+async def reminder_loop():
+    while True:
+        try:
+            await run_reminders()
+        except Exception as e:
+            logger.error(f"Reminder loop error: {e}")
+        await asyncio.sleep(15 * 60)
+
+
+@api_router.post("/admin/table-requests/run-reminders")
+async def trigger_reminders(request: Request):
+    require_admin(request)
+    return {"sent": await run_reminders()}
+
+
+@api_router.post("/admin/table-requests/{req_id}/remind")
+async def remind_one(req_id: str, request: Request):
+    require_admin(request)
+    req = await db.table_requests.find_one({"id": req_id}, {"_id": 0})
+    if not req:
+        raise HTTPException(status_code=404, detail="Richiesta non trovata")
+    if req["status"] != "confirmed":
+        raise HTTPException(status_code=409, detail="Solo le richieste confermate ricevono il promemoria")
+    return {"sent": await send_reminder(req)}
 
 
 # --- AI assistant (GPT-5.4 mini via Emergent LLM key) ---

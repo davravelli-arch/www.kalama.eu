@@ -67,3 +67,8 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 - PATCH /api/admin/table-requests/{id} con status confirmed|declined invia email al cliente nella sua lingua (template `GUEST_MAIL` in booking.py, 6 lingue; rifiuto con link WhatsApp sede), reply-to = email sede; salva `guest_notified_at`/`guest_notified_status`; ritorna `guest_notified`. Provider blocca destinatari non raggiungibili (422) → backend logga, stato aggiornato comunque, toast warning in admin. Badge "Cliente avvisato" nel tab Prenotazioni.
 - Test: iteration_6 → 8 backend + E2E admin verdi.
 - In attesa dell'utente: chiave Google Places, foto reali sedi (da caricare in admin → Foto del sito → sede Málaga/Sliema: alimentano anche la schermata di scelta sede), testi delle recensioni preferite (non inventare recensioni).
+
+## Aggiornamento 13/06/2026 — Promemoria automatico
+- Job asyncio in background (ogni 15 min, avviato allo startup) invia alle richieste `confirmed` con data = oggi (Europe/Madrid) e ora locale >= 9 un'email promemoria nella lingua del cliente (template `REMINDER` in booking.py) con indirizzo/mappa e WhatsApp; salva `reminder_sent_at` (idempotente). Endpoint admin: `POST /admin/table-requests/run-reminders` e `POST /admin/table-requests/{id}/remind` (409 se non confermata). Pulsante "Promemoria" + badge "Promemoria inviato" nel tab Prenotazioni.
+- Test: iteration_7 → 7 backend + E2E admin verdi (ramo <9 verificato per il job).
+- Ancora in attesa dell'utente: testi recensioni, chiave Google Places, foto reali sedi.

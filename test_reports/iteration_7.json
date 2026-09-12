@@ -1,0 +1,24 @@
+{
+  "summary": "Tested new client-reminder feature end-to-end. Seeded 3 requests in Mongo (A confirmed FR delivered@resend.dev, B new delivered@resend.dev, C confirmed qa@example.com). All 7 pytest cases in /app/backend/tests/test_reminders.py passed (POST /admin/table-requests/{A}/remind => {sent:true} + reminder_sent_at ISO set; B => 409; C => {sent:false} with no reminder_sent_at; missing id => 404; no token => 401; run-reminders => sent 0 in the BEFORE-9AM branch, verified case since Madrid time was 01:5x < 09:00, A remained without reminder_sent_at after $unset as expected; B and C never received reminder_sent_at). Frontend admin flow verified: login OK, admin-tab-bookings shows row A with data-testid=admin-booking-reminded-{A} 'Promemoria inviato' badge and admin-booking-remind-{A} button, B has NO remind button (status=new), C shows remind button; click A => toast 'Promemoria inviato al cliente'; click C => toast warning 'Promemoria non inviato (indirizzo non raggiungibile)'. Cleaned up all 3 rows via DELETE /api/admin/table-requests/{id}. Total real emails sent during test: 2 (both to delivered@resend.dev), well under 4-email limit.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_reminders.py",
+    "/app/test_reports/pytest/reminders_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py run_reminders() uses `now.date().isoformat()` (Europe/Madrid). Because reminder_loop sleeps 15 minutes, the first run just after 08:59 local may miss the first minute of the 09:00 window but next tick covers it — acceptable.",
+    "send_reminder() only sets reminder_sent_at on successful send; failures (email API errors) are logged and safely retried on the next tick. This matches manual /remind endpoint behavior (returns {sent:false} without marking sent).",
+    "run-reminders relies on `reminder_sent_at: {$exists: false}` filter → idempotent. Good.",
+    "The /remind endpoint returns 200 with {sent:false} when the email provider rejects the recipient; the FE distinguishes with toast.warning. Consistent UX."
+  ],
+  "updated_files": ["/app/backend/tests/test_reminders.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin password from /app/memory/test_credentials.md (KalamaMare2026!)",
+  "seed_data_creation": "Inserted 3 TEST_ rows directly in Mongo db.table_requests then deleted them via DELETE /api/admin/table-requests/{id}. Also removed 1 leftover 'QA Reminder' row from a prior iteration.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "run_reminders BEFORE-9AM branch verified (Madrid local hour <9 at test time). AFTER-9AM branch (sent>=1 then idempotent 0) was not exercised — if you rerun during 09:00–23:59 Europe/Madrid, the test in test_reminders.py auto-detects and exercises that path.",
+  "rca of the issue": "n/a — all checks passed"
+}

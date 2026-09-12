@@ -179,6 +179,34 @@ def guest_email(r: dict, status: str) -> tuple[str, str]:
     return subject, html
 
 
+REMINDER = {
+    "it": ("Promemoria: oggi il tuo tavolo · {site}", "Ciao {name}, ti ricordiamo il tuo tavolo di oggi alle {time} per {guests} persone. Ti aspettiamo!", "Per qualsiasi cambio scrivici su WhatsApp:"),
+    "en": ("Reminder: your table today · {site}", "Hi {name}, a quick reminder of your table today at {time} for {guests} guests. See you soon!", "For any change, message us on WhatsApp:"),
+    "es": ("Recordatorio: hoy tu mesa · {site}", "Hola {name}, te recordamos tu mesa de hoy a las {time} para {guests} personas. ¡Te esperamos!", "Para cualquier cambio, escríbenos por WhatsApp:"),
+    "de": ("Erinnerung: heute dein Tisch · {site}", "Hallo {name}, kleine Erinnerung an deinen Tisch heute um {time} für {guests} Personen. Bis bald!", "Bei Änderungen schreib uns per WhatsApp:"),
+    "fr": ("Rappel : votre table aujourd'hui · {site}", "Bonjour {name}, petit rappel de votre table aujourd'hui à {time} pour {guests} personnes. À très vite !", "Pour tout changement, écrivez-nous sur WhatsApp :"),
+    "pt": ("Lembrete: a tua mesa hoje · {site}", "Olá {name}, lembramos a tua mesa de hoje às {time} para {guests} pessoas. Até já!", "Para qualquer alteração, escreve-nos no WhatsApp:"),
+}
+
+
+def reminder_email(r: dict) -> tuple[str, str]:
+    subj, intro, wa_txt = REMINDER.get(r.get("lang"), REMINDER["en"])
+    m = GUEST_MAIL.get(r.get("lang"), GUEST_MAIL["en"])
+    site = SITES[r["site"]]
+    html = (
+        '<table role="presentation" width="100%" style="font-family:Arial,sans-serif;color:#1D1D1B"><tr><td style="padding:28px">'
+        f'<h2 style="margin:0 0 6px;color:#1D1D1B">{escape(site["name"])}</h2>'
+        f'<p style="font-size:18px;margin:0 0 18px">{escape(intro.format(name=r["name"], time=r["time"], guests=r["guests"]))}</p>'
+        f'<p style="margin:0 0 6px">{m["see"]}</p>'
+        f'<a href="{site["maps"]}" style="display:inline-block;background:#FCC617;color:#1D1D1B;font-weight:bold;padding:12px 22px;border-radius:999px;text-decoration:none;border:2px solid #1D1D1B">{escape(site["address"])}</a>'
+        f'<p style="margin:20px 0 6px">{escape(wa_txt)}</p>'
+        f'<a href="https://wa.me/{site["whatsapp"]}" style="display:inline-block;background:#25D366;color:#fff;font-weight:bold;padding:12px 22px;border-radius:999px;text-decoration:none;border:2px solid #1D1D1B">WhatsApp {escape(site["phone"])}</a>'
+        f'<p style="font-size:12px;color:#888;margin-top:28px">{m["footer"]} · {escape(site["address"])} · {escape(site["phone"])}</p>'
+        "</td></tr></table>"
+    )
+    return subj.format(site=site["name"]), html
+
+
 class ChatIn(BaseModel):
     session_id: str = Field(min_length=8, max_length=80)
     message: str = Field(min_length=1, max_length=1000)

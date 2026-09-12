@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Trash2, Check, X, Mail, Phone } from "lucide-react";
+import { Trash2, Check, X, Mail, Phone, BellRing } from "lucide-react";
 import { API, authHeaders } from "./ui";
 
 const SITE = { malaga: "Málaga", malta: "Sliema" };
@@ -27,6 +27,15 @@ export const BookingsManager = ({ onUnauthorized }) => {
     } catch { toast.error("Errore nell'aggiornamento"); }
   };
 
+  const remind = async (id) => {
+    try {
+      const { data } = await axios.post(`${API}/admin/table-requests/${id}/remind`, {}, authHeaders());
+      if (data.sent) toast.success("Promemoria inviato al cliente");
+      else toast.warning("Promemoria non inviato (indirizzo non raggiungibile)");
+      load();
+    } catch (e) { toast.error(e.response?.data?.detail || "Errore nell'invio"); }
+  };
+
   const remove = async (r) => {
     if (!window.confirm(`Eliminare la richiesta di ${r.name}?`)) return;
     try {
@@ -44,7 +53,7 @@ export const BookingsManager = ({ onUnauthorized }) => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="font-display text-5xl text-ink tracking-wide">RICHIESTE TAVOLO</h2>
-          <p className="text-ink/60 font-medium mt-1">{list.filter((r) => r.status === "new").length} nuove · {list.length} totali. Confermando o rifiutando, il cliente riceve subito un'email nella sua lingua.</p>
+          <p className="text-ink/60 font-medium mt-1">{list.filter((r) => r.status === "new").length} nuove · {list.length} totali. Confermando o rifiutando, il cliente riceve subito un'email nella sua lingua; la mattina del tavolo (ore 9) parte in automatico il promemoria.</p>
         </div>
         <div data-testid="admin-bookings-filter" className="inline-flex border-2 border-ink rounded-full bg-white p-1 shadow-hard-sm">
           {["all", "new", "confirmed", "declined"].map((s) => (
@@ -64,6 +73,7 @@ export const BookingsManager = ({ onUnauthorized }) => {
                 <span className={`text-[11px] font-bold uppercase tracking-widest border-2 border-ink rounded-full px-2.5 py-0.5 ${STATUS[r.status][1]}`}>{STATUS[r.status][0]}</span>
                 <span className="text-[11px] font-bold uppercase tracking-widest text-ink/50">{SITE[r.site]} · {r.lang?.toUpperCase()}</span>
                 {r.guest_notified_at && <span data-testid={`admin-booking-notified-${r.id}`} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-ocean"><Mail className="w-3 h-3" /> Cliente avvisato</span>}
+                {r.reminder_sent_at && <span data-testid={`admin-booking-reminded-${r.id}`} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-ocean"><BellRing className="w-3 h-3" /> Promemoria inviato</span>}
               </div>
               <p className="font-display text-3xl text-ink tracking-wide mt-1">{r.date} · {r.time} · {r.guests} pers.</p>
               <p className="font-bold text-ink">{r.name} <span className="text-ink/40 font-medium">· {ZONE[r.zone]}{r.occasion ? ` · ${OCC[r.occasion]}` : ""}{r.accessibility ? " · accesso agevolato" : ""}</span></p>
@@ -77,6 +87,9 @@ export const BookingsManager = ({ onUnauthorized }) => {
               <button onClick={() => setStatus(r.id, "confirmed")} data-testid={`admin-booking-confirm-${r.id}`} className="inline-flex items-center gap-1 bg-[#25D366] text-white border-2 border-ink rounded-full px-3 py-1.5 text-xs font-bold uppercase shadow-hard-sm btn-lift"><Check className="w-4 h-4" /> Conferma</button>
               <button onClick={() => setStatus(r.id, "declined")} data-testid={`admin-booking-decline-${r.id}`} className="inline-flex items-center gap-1 bg-coral text-ink border-2 border-ink rounded-full px-3 py-1.5 text-xs font-bold uppercase shadow-hard-sm btn-lift"><X className="w-4 h-4" /> Rifiuta</button>
               <button onClick={() => remove(r)} data-testid={`admin-booking-delete-${r.id}`} className="inline-flex items-center gap-1 bg-white text-ink border-2 border-ink rounded-full px-3 py-1.5 text-xs font-bold uppercase shadow-hard-sm btn-lift"><Trash2 className="w-4 h-4" /> Elimina</button>
+              {r.status === "confirmed" && (
+                <button onClick={() => remind(r.id)} data-testid={`admin-booking-remind-${r.id}`} className="inline-flex items-center gap-1 bg-lemon text-ink border-2 border-ink rounded-full px-3 py-1.5 text-xs font-bold uppercase shadow-hard-sm btn-lift"><BellRing className="w-4 h-4" /> Promemoria</button>
+              )}
             </div>
           </div>
         ))}
