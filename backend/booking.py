@@ -9,8 +9,8 @@ from pydantic import BaseModel, Field, field_validator
 SITES = {
     "malaga": {
         "name": "Kalamà Málaga", "address": "Calle Trinidad Grund 7, Soho, 29001 Málaga", "email": "info@kalama.eu",
-        "phone": "+34 610 755 695", "whatsapp": "34610755695", "hours": "Mar–Dom 12:00–23:30 (lunedì chiuso)",
-        "closed_weekdays": [0], "lunch": ("12:00", "15:30"), "dinner": ("19:00", "22:30"),
+        "phone": "+34 610 755 695", "whatsapp": "34610755695", "hours": "Mar–Dom 12:00–16:00 e 20:00–23:30 (lunedì chiuso)",
+        "closed_weekdays": [0], "lunch": ("12:00", "15:30"), "dinner": ("20:00", "23:00"),
         "delivery": "Glovo", "booking": "TheFork: https://www.thefork.es/restaurante/kalama-malaga-r866671",
         "maps": "https://maps.google.com/?cid=12800882317661358537", "menu_lang": "it",
     },
