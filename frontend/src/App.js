@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import "@/App.css";
 import { translations } from "@/i18n";
 import { SiteContext, useSite } from "@/lib/site";
+import { applySettings } from "@/lib/settings";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Ticker } from "@/components/Ticker";
@@ -85,12 +86,17 @@ function App() {
   const [site, setSiteState] = useState(() => localStorage.getItem("kalama_site") || "");
   const [bookingOpen, setBookingOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/site-settings`).then((r) => { applySettings(r.data); setSettings(r.data); }).catch(() => setSettings({}));
+  }, []);
 
   const setLang = (l) => { localStorage.setItem("kalama_lang", l); setLangState(l); };
   const setSite = (s) => { localStorage.setItem("kalama_site", s); setSiteState(s); };
 
   const ctx = {
-    t: translations[lang], lang, setLang, site, setSite, bookingOpen, chatOpen, setChatOpen,
+    t: translations[lang], lang, setLang, site, setSite, bookingOpen, chatOpen, setChatOpen, settings,
     openBooking: () => setBookingOpen(true), closeBooking: () => setBookingOpen(false),
   };
 

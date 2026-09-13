@@ -81,3 +81,11 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 - Icone Instagram/Facebook con colori originali (`SocialIcons.jsx`) in footer e drawer. Foto piatti copiate Málaga→Sliema (18) + endpoint `POST /api/admin/menu/copy-images` e bottone admin.
 - Test: iteration_8 e iteration_10 verdi.
 - In attesa utente: chiave Google Places, testi recensioni, foto piatti mancanti (tartare, teriyaki tuna salad).
+
+## Aggiornamento 13/06/2026 (sera) — Recensioni pubblicate, sfondi, orari, Testi e sedi, deploy-ready
+- 9 recensioni reali pubblicate (4 Sliema, 5 Málaga; 6 in evidenza) fornite dal cliente; rimosse quelle da 4/3 stelle su richiesta.
+- Sfondi: galleria (mare, `bg-gallery`), Dicono di noi (terrazza tramonto, `bg-reviews`, overlay scuro), Contatti (terrazza Sliema con ombrelloni, `bg-contact`), Menu (pergamena filigrana, `bg-menu`). Foto About = cartoccio calamari. Voce MENU evidenziata (pill gialla) in navbar e drawer. Selettore lingua nel gate. Orari Málaga: 12:00–16:00 + 20:00–23:30 (locations.js + booking.py slots cena 20:00–23:00).
+- Deploy check: rimosso reseed distruttivo del menu allo startup (ora seed solo se collection vuota).
+- Tab admin **Testi e sedi**: `GET /api/site-settings`, `PUT /api/admin/site-settings` (whitelist campi: address, phone, whatsapp, email, hours_it/en, mapsUrl, delivery_url, booking_url, hero_it/en per malaga/sliema + socials instagram/facebook). Frontend `lib/settings.js` applica override a `locations`/`socials` (mutazione in place all'avvio) e sottotitolo hero; backend `site_contact()` usa gli override per email/WhatsApp richiesta tavolo e prompt chat. Test iteration_11 verde.
+- Link anteprima condivisibile con i soci: REACT_APP_BACKEND_URL (preview). Pubblicazione: Publish + dominio kalama.eu.
+- In attesa: chiave Google Places; foto Tartare/Teriyaki; video hero Málaga.

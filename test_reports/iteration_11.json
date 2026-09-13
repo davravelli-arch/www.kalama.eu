@@ -1,0 +1,21 @@
+{
+  "summary": "Iter11 (Testi e sedi): backend + frontend end-to-end verificati. Backend 6/6 pytest OK — GET /api/site-settings restituisce {malaga:{}, sliema:{}, socials:{}} (dopo cleanup); PUT /api/admin/site-settings con Bearer accetta il payload, filtra i campi non whitelisted (campo_non_valido, tiktok) e ritorna 200 con hours_it '(QA)' e socials.instagram='https://instagram.com/kalama_test'; GET riflette la scrittura; senza token → 401. Regressione seed: GET /api/menu = 105 voci stabili (nessun reseed dopo restart, il codice usa count==0 gate); GET /api/reviews = 9. Cleanup PUT ripristina i default ({} per tutti). Frontend: home (kalama_site=malaga) → [data-testid=locations-section] contiene '(QA)'; [data-testid=footer-instagram] href = https://instagram.com/kalama_test. Admin login KalamaMare2026! → tab [admin-tab-settings] → [admin-settings-manager] mostra input [admin-settings-malaga-hours_it] precompilato con '(QA)'; textarea [admin-settings-malaga-hero_it] settata a 'Frase QA di apertura' → [admin-settings-save-btn] → toast 'Testi e contatti salvati'; ricaricando home la hero override 'Frase QA di apertura' è presente nel DOM. Cleanup finale PUT {} confermato: '(QA)' e 'Frase QA' spariti da home.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": ["/app/backend/tests/test_iter11_settings.py", "/app/test_reports/pytest/iter11.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "clean_settings() applica strip()[:300] a ogni valore whitelisted e whitelista solo instagram/facebook per socials: buona sanificazione, evita bloat DB.",
+    "site_contact() sovrappone gli override ai defaults SITES: usato correttamente da chat prompt e email tavolo — assicura che gli admin possano modificare i dati usati anche lato server.",
+    "heroOverride() legge da settings[site==malta?'sliema':'malaga']: mapping consistente con backend (chiave 'sliema' anche per site 'malta').",
+    "server.py ~920 righe: come nelle iterazioni precedenti, valutare split in moduli (settings, admin_menu, storage, table_requests, chat)."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter11_settings.py", "/app/test_reports/iteration_11.json"],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "100%"},
+  "test_credentials": "KalamaMare2026!",
+  "seed_data_creation": "Nessun seed persistente: le settings sono state ripristinate ai default ({}) come cleanup finale.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Le settings site_settings sono un doc singolo (_id=site_settings) in db.settings, distinto da _id=google_places. PUT ritorna il documento pulito (dopo clean_settings), che è già il payload post-whitelist. Il seed_menu ora è idempotente (count==0). Per test frontend: localStorage kalama_site=malaga + kalama_privacy_ok=1 salta il gate; home carica lentamente per il video hero, usare wait_until='load' + wait_for_timeout(3000).",
+  "rca of the issue": "N/A"
+}

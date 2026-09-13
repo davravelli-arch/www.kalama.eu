@@ -2,13 +2,15 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Phone, ArrowDown, MapPin, ShoppingBag } from "lucide-react";
 import { imgUrl } from "../lib/img";
 import { useSite, siteLocation, SITE_NAME } from "../lib/site";
+import { heroOverride } from "../lib/settings";
 
 const EASE = [0.22, 1, 0.36, 1];
 
 const DEFAULT_IMG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-1-7495721.jpg";
 
 export const Hero = ({ t, image, video }) => {
-  const { site } = useSite();
+  const { site, lang, settings } = useSite();
+  const heroText = heroOverride(settings, site, lang);
   const loc = siteLocation(site);
   const delivery = loc.actions.find((a) => a.kind === "order") || loc.actions[0];
   const { scrollY } = useScroll();
@@ -80,7 +82,7 @@ export const Hero = ({ t, image, video }) => {
           data-testid="hero-subtitle"
           className="text-cream/90 text-base sm:text-lg max-w-xl mt-6 font-medium"
         >
-          {site ? t.site.heroSub[site] : t.hero.subtitle}
+          {heroText || (site ? t.site.heroSub[site] : t.hero.subtitle)}
         </motion.p>
         {site && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.95 }} data-testid="hero-delivery" className="inline-flex items-center gap-3 mt-5 bg-white/95 border-2 border-ink rounded-2xl px-4 py-2 shadow-hard-sm">

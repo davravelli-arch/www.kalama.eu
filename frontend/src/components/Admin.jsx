@@ -1,18 +1,20 @@
 import { useState } from "react";
 import axios from "axios";
-import { LogOut, ArrowLeft, UtensilsCrossed, Images, Eye, EyeOff, MessageSquareQuote, CalendarDays } from "lucide-react";
+import { LogOut, ArrowLeft, UtensilsCrossed, Images, Eye, EyeOff, MessageSquareQuote, CalendarDays, Settings2 } from "lucide-react";
 import { Logo } from "./Logo";
 import { API, TOKEN_KEY, Field, inputCls } from "./admin/ui";
 import { MenuManager } from "./admin/MenuManager";
 import { SitePhotos } from "./admin/SitePhotos";
 import { ReviewsManager } from "./admin/ReviewsManager";
 import { BookingsManager } from "./admin/BookingsManager";
+import { SettingsManager } from "./admin/SettingsManager";
 
 const TABS = [
   ["menu", "Menu", UtensilsCrossed],
   ["photos", "Foto del sito", Images],
   ["reviews", "Recensioni", MessageSquareQuote],
   ["bookings", "Prenotazioni", CalendarDays],
+  ["settings", "Testi e sedi", Settings2],
 ];
 
 export default function Admin() {
@@ -112,6 +114,7 @@ export default function Admin() {
         {tab === "photos" && <SitePhotos onUnauthorized={logout} />}
         {tab === "reviews" && <ReviewsManager onUnauthorized={logout} />}
         {tab === "bookings" && <BookingsManager onUnauthorized={logout} />}
+        {tab === "settings" && <SettingsManager onUnauthorized={logout} />}
       </main>
     </div>
   );

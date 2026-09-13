@@ -103,8 +103,8 @@ def request_rows(r: TableRequest) -> list[tuple[str, str]]:
     ]
 
 
-def whatsapp_url(r: TableRequest) -> str:
-    site = SITES[r.site]
+def whatsapp_url(r: TableRequest, site: dict | None = None) -> str:
+    site = site or SITES[r.site]
     lines = [f"Ciao {site['name']}! Richiesta tavolo dal sito:", f"📅 {r.date} ⏰ {r.time} 👥 {r.guests}",
              f"Zona: {ZONE_LABEL[r.zone]}" + (f" · {OCCASION_LABEL[r.occasion]}" if r.occasion else ""),
              f"Nome: {r.name}"]
@@ -217,9 +217,10 @@ class ChatIn(BaseModel):
 LANG_NAMES = {"it": "italiano", "en": "English", "es": "español", "de": "Deutsch", "fr": "français", "pt": "português"}
 
 
-def build_system_prompt(site: str, lang: str, menu_items: list[dict], reviews_hint: str = "") -> str:
-    s = SITES[site]
-    other = SITES["malta" if site == "malaga" else "malaga"]
+def build_system_prompt(site: str, lang: str, menu_items: list[dict], reviews_hint: str = "", sites: dict | None = None) -> str:
+    sites = sites or SITES
+    s = sites[site]
+    other = sites["malta" if site == "malaga" else "malaga"]
     by_cat: dict[str, list[str]] = {}
     for it in menu_items:
         name = it.get("name_it") if s["menu_lang"] == "it" else it.get("name_en")

@@ -675,6 +675,52 @@ async def copy_menu_images(request: Request, source: str = "malaga", target: str
     return {"copied": copied}
 
 
+# --- Site settings (editable texts, contacts, hours) ---
+SETTINGS_FIELDS = {"address", "phone", "email", "hours_it", "hours_en", "whatsapp", "mapsUrl", "delivery_url", "booking_url", "hero_it", "hero_en"}
+
+
+class SiteSettings(BaseModel):
+    malaga: dict[str, str] = {}
+    sliema: dict[str, str] = {}
+    socials: dict[str, str] = {}
+
+
+def clean_settings(body: SiteSettings) -> dict:
+    out = {"socials": {k: v.strip() for k, v in body.socials.items() if k in {"instagram", "facebook"}}}
+    for loc in ("malaga", "sliema"):
+        out[loc] = {k: v.strip()[:300] for k, v in getattr(body, loc).items() if k in SETTINGS_FIELDS}
+    return out
+
+
+async def get_settings_doc() -> dict:
+    doc = await db.settings.find_one({"_id": "site_settings"}, {"_id": 0})
+    return doc or {"malaga": {}, "sliema": {}, "socials": {}}
+
+
+async def site_contact(site: str) -> dict:
+    s = dict(SITES[site])
+    ov = (await get_settings_doc()).get("malaga" if site == "malaga" else "sliema", {})
+    for k_src, k_dst in (("phone", "phone"), ("email", "email"), ("address", "address"), ("hours_it", "hours"), ("mapsUrl", "maps")):
+        if ov.get(k_src):
+            s[k_dst] = ov[k_src]
+    if ov.get("whatsapp"):
+        s["whatsapp"] = "".join(ch for ch in ov["whatsapp"] if ch.isdigit())
+    return s
+
+
+@api_router.get("/site-settings")
+async def read_settings():
+    return await get_settings_doc()
+
+
+@api_router.put("/admin/site-settings")
+async def write_settings(body: SiteSettings, request: Request):
+    require_admin(request)
+    data = clean_settings(body)
+    await db.settings.update_one({"_id": "site_settings"}, {"$set": data}, upsert=True)
+    return data
+
+
 # --- Table requests ---
 @api_router.get("/table-requests/slots")
 async def get_slots(site: str, date: str):
@@ -692,12 +738,12 @@ async def create_table_request(body: TableRequestIn, request: Request):
     global_cap("email")
     req = TableRequest(**body.model_dump())
     await db.table_requests.insert_one(req.model_dump())
-    site = SITES[req.site]
+    site = await site_contact(req.site)
     asyncio.create_task(notify_owner(
         f"Richiesta tavolo {site['name']} — {req.date} {req.time} · {req.guests} pers.",
         request_rows(req), to=site["email"],
     ))
-    return {"id": req.id, "whatsapp_url": whatsapp_url(req), "site_email": site["email"]}
+    return {"id": req.id, "whatsapp_url": whatsapp_url(req, site), "site_email": site["email"]}
 
 
 @api_router.get("/admin/table-requests")
@@ -811,7 +857,7 @@ async def chat(body: ChatIn, request: Request):
     history_docs = await db.chat_messages.find({"session_id": body.session_id}, {"_id": 0, "role": 1, "content": 1}) \
         .sort("created_at", -1).limit(CHAT_HISTORY_LIMIT).to_list(CHAT_HISTORY_LIMIT)
     history = [{"role": d["role"], "content": d["content"]} for d in reversed(history_docs)]
-    system = build_system_prompt(body.site, body.lang, menu_items)
+    system = build_system_prompt(body.site, body.lang, menu_items, sites={k: await site_contact(k) for k in SITES})
     llm = LlmChat(api_key=EMERGENT_KEY, session_id=body.session_id, system_message=system,
                   initial_messages=[{"role": "system", "content": system}, *history]).with_model(*CHAT_MODEL)
     now = datetime.now(timezone.utc).isoformat()
