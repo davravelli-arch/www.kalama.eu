@@ -1,4 +1,5 @@
 import Marquee from "react-fast-marquee";
+import { WarmBackdrop } from "./WarmBackdrop";
 import { KineticLines } from "./Kinetic";
 import { imgUrl } from "../lib/img";
 
@@ -12,17 +13,19 @@ const IMAGES = [
   REAL + "kalama-malaga-seafood-bar-3-7495723.jpg",
 ];
 
-export const Gallery = ({ t, images }) => {
+export const Gallery = ({ t, images, siteImages = {} }) => {
   const list = images && images.length ? [...images, ...IMAGES].slice(0, 10) : IMAGES;
   return (
-    <section id="galleria" data-testid="gallery-section" className="py-24 sm:py-32 bg-cream overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 mb-12">
+    <section id="galleria" data-testid="gallery-section" className="relative py-24 sm:py-32 bg-cream overflow-hidden">
+      <WarmBackdrop images={siteImages} srcKey="bg-gallery" opacity={0.95} overlay="bg-gradient-to-b from-cream/70 via-cream/10 to-cream/70" />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 mb-12">
         <span className="text-coral font-bold uppercase tracking-widest text-sm">{t.gallery.kicker}</span>
         <KineticLines
           lines={t.gallery.titleLines}
           className="font-display text-5xl sm:text-6xl lg:text-8xl leading-[0.92] mt-4 text-ink"
         />
       </div>
+      <div className="relative z-10">
       <Marquee speed={25} gradient={false} pauseOnHover>
         {list.map((src, i) => (
           <div
@@ -34,6 +37,7 @@ export const Gallery = ({ t, images }) => {
           </div>
         ))}
       </Marquee>
+      </div>
     </section>
   );
 };

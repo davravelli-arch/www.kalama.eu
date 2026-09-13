@@ -51,8 +51,8 @@ function Landing() {
         <About t={t} image={images.about} images={images} />
         <MenuSection t={t} lang={lang} />
         <Locations t={t} lang={lang} images={images} />
-        <Gallery t={t} images={images.gallery} />
-        <Reviews t={t} />
+        <Gallery t={t} images={images.gallery} siteImages={images} />
+        <Reviews t={t} siteImages={images} />
         <Franchising t={t} images={images} />
         <Contact t={t} images={images} />
       </main>

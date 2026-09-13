@@ -11,6 +11,8 @@ const SINGLES = [
   ["hero-malta", "Foto in apertura · Sliema (anteprima del video)"],
   ["bg-malaga", "Sfondo caldo sezioni · Málaga"],
   ["bg-malta", "Sfondo caldo sezioni · Sliema"],
+  ["bg-gallery", "Sfondo mare · Galleria"],
+  ["bg-reviews", "Sfondo · Dicono di noi"],
   ["about", "Foto sezione Chi Siamo"],
   ["location-malaga", "Foto sede Málaga"],
   ["location-sliema", "Foto sede Sliema"],
