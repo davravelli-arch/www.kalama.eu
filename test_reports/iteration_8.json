@@ -1,0 +1,29 @@
+{
+  "summary": "Iteration 8: tested site-images assets per sede (hero-malaga/malta, bg-malaga/malta, hero-video-malta), Range video streaming, LocationGate lang switcher DE, hero image vs hero video per sede, hero H1 without trailing dots, WarmBackdrop presence in 4 sections, and Admin 'Foto del sito' cards. Backend 4/4 pytest passed. Frontend gate/hero/backdrop/admin all green. Video range 206 with Content-Range/Accept-Ranges works; non-range returns 200 video/mp4. PUT bg-malaga idempotent OK; PUT bg-roma → 404.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_site_images_v8.py",
+    "/app/test_reports/pytest/site_images_v8.xml"
+  ],
+  "action_items": [
+    "Nota: GET /api/menu restituisce 104 voci (Málaga+Malta) mentre la review-request cita 105. Non bloccante ma da verificare se una voce è stata rimossa/duplicata."
+  ],
+  "critical_code_review_comments": [
+    "server.py serve_file() gestisce Range correttamente (206 + Content-Range + Accept-Ranges).",
+    "SITE_IMAGE_KEYS include tutte le 12 chiavi attese; validazione PUT su chiave non ammessa restituisce 404.",
+    "LocationGate DropdownMenu richiede click sul trigger prima di poter selezionare l'opzione — comportamento standard shadcn, ok."
+  ],
+  "updated_files": ["/app/backend/tests/test_site_images_v8.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin password from /app/memory/test_credentials.md",
+  "seed_data_creation": "nessuno (PUT bg-malaga con valore identico, nessuna modifica ai site-images)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Per il video hero-malta il browser headless mostra readyState 0 (H.264 non decodificato) — normale; verificare solo src .mp4 e poster non vuoto come indicato. Menu count osservato: 104 (non 105).",
+  "rca of the issue": "n/a — tutte le verifiche richieste sono passate; solo differenza minore su conteggio menu."
+}

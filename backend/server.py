@@ -324,8 +324,10 @@ STORAGE_URL = STORAGE_BASE.rstrip("/") + "/objstore/api/v1/storage"
 EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
 APP_NAME = "kalama"
 MAX_UPLOAD = 8 * 1024 * 1024
+MAX_VIDEO_UPLOAD = 40 * 1024 * 1024
 IMAGE_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
-SITE_IMAGE_KEYS = {"hero", "about", "location-malaga", "location-sliema", "foodtruck", "gallery"}
+VIDEO_TYPES = {"video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov"}
+SITE_IMAGE_KEYS = {"hero", "hero-malaga", "hero-malta", "about", "location-malaga", "location-sliema", "foodtruck", "gallery", "hero-video-malaga", "hero-video-malta", "bg-malaga", "bg-malta"}
 _storage_key: Optional[str] = None
 
 
@@ -362,8 +364,9 @@ async def get_object(path: str) -> tuple[bytes, str]:
 
 
 async def store_image(data: bytes, content_type: str, original_name: str) -> str:
-    ext = IMAGE_TYPES[content_type]
-    path = f"{APP_NAME}/uploads/{uuid.uuid4()}.{ext}"
+    is_video = content_type in VIDEO_TYPES
+    ext = VIDEO_TYPES[content_type] if is_video else IMAGE_TYPES[content_type]
+    path = f"{APP_NAME}/{'videos' if is_video else 'uploads'}/{uuid.uuid4()}.{ext}"
     result = await put_object(path, data, content_type)
     await db.files.insert_one({
         "id": str(uuid.uuid4()), "storage_path": result["path"], "original_filename": original_name,
@@ -376,11 +379,12 @@ async def store_image(data: bytes, content_type: str, original_name: str) -> str
 @api_router.post("/admin/upload")
 async def admin_upload(request: Request, file: UploadFile = File(...)):
     require_admin(request)
-    if file.content_type not in IMAGE_TYPES:
-        raise HTTPException(status_code=415, detail="Formato non supportato: usa JPG, PNG o WebP")
+    is_video = file.content_type in VIDEO_TYPES
+    if not is_video and file.content_type not in IMAGE_TYPES:
+        raise HTTPException(status_code=415, detail="Formato non supportato: usa JPG, PNG, WebP o video MP4/WebM")
     data = await file.read()
-    if len(data) > MAX_UPLOAD:
-        raise HTTPException(status_code=413, detail="Immagine troppo grande (max 8 MB)")
+    if len(data) > (MAX_VIDEO_UPLOAD if is_video else MAX_UPLOAD):
+        raise HTTPException(status_code=413, detail="File troppo grande (max 40 MB video, 8 MB immagini)")
     try:
         url = await store_image(data, file.content_type, file.filename or "upload")
     except httpx.HTTPStatusError as e:
@@ -390,7 +394,7 @@ async def admin_upload(request: Request, file: UploadFile = File(...)):
 
 
 @api_router.get("/files/{path:path}")
-async def serve_file(path: str):
+async def serve_file(path: str, request: Request):
     record = await db.files.find_one({"storage_path": path, "is_deleted": False})
     if not record:
         raise HTTPException(status_code=404, detail="File non trovato")
@@ -398,8 +402,18 @@ async def serve_file(path: str):
         data, content_type = await get_object(path)
     except httpx.HTTPStatusError:
         raise HTTPException(status_code=404, detail="File non trovato")
-    return Response(content=data, media_type=record.get("content_type", content_type),
-                    headers={"Cache-Control": "public, max-age=31536000, immutable"})
+    media_type = record.get("content_type", content_type)
+    headers = {"Cache-Control": "public, max-age=31536000, immutable", "Accept-Ranges": "bytes"}
+    range_header = request.headers.get("range")
+    if range_header and range_header.startswith("bytes="):
+        start_s, _, end_s = range_header[6:].partition("-")
+        start = int(start_s or 0)
+        end = min(int(end_s) if end_s else len(data) - 1, len(data) - 1)
+        if start > end or start >= len(data):
+            raise HTTPException(status_code=416, detail="Range non valido")
+        headers["Content-Range"] = f"bytes {start}-{end}/{len(data)}"
+        return Response(content=data[start:end + 1], status_code=206, media_type=media_type, headers=headers)
+    return Response(content=data, media_type=media_type, headers=headers)
 
 
 class SiteImageUpdate(BaseModel):

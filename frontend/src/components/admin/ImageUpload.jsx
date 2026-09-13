@@ -9,7 +9,7 @@ const MAX_SIDE = 1600;
 
 const shrink = (file) =>
   new Promise((resolve) => {
-    if (file.type === "image/gif" || file.size < 600 * 1024) return resolve(file);
+    if (file.type === "image/gif" || file.type.startsWith("video/") || file.size < 600 * 1024) return resolve(file);
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
@@ -33,7 +33,7 @@ export const uploadImage = async (file) => {
   return data.url;
 };
 
-export const ImageUpload = ({ value, onChange, testId, label = "Carica foto", compact = false }) => {
+export const ImageUpload = ({ value, onChange, testId, label = "Carica foto", compact = false, video = false }) => {
   const ref = useRef();
   const [busy, setBusy] = useState(false);
 
@@ -41,10 +41,11 @@ export const ImageUpload = ({ value, onChange, testId, label = "Carica foto", co
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    if (video && file.size > 40 * 1024 * 1024) return toast.error("Video troppo grande (max 40 MB)");
     setBusy(true);
     try {
       onChange(await uploadImage(file));
-      toast.success("Foto caricata");
+      toast.success(video ? "Video caricato" : "Foto caricata");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Caricamento non riuscito");
     } finally {
@@ -52,16 +53,21 @@ export const ImageUpload = ({ value, onChange, testId, label = "Carica foto", co
     }
   };
 
+  const box = compact ? "h-16 w-24" : "h-40 w-full mb-3";
   return (
     <div data-testid={testId} className={compact ? "flex items-center gap-3" : ""}>
       {value ? (
-        <img src={imgUrl(value)} alt="Anteprima" data-testid={`${testId}-preview`} className={`${compact ? "h-16 w-24" : "h-40 w-full mb-3"} object-cover rounded-xl border-2 border-ink`} />
+        video ? (
+          <video src={imgUrl(value)} muted loop autoPlay playsInline data-testid={`${testId}-preview`} className={`${box} object-cover rounded-xl border-2 border-ink bg-ink`} />
+        ) : (
+          <img src={imgUrl(value)} alt="Anteprima" data-testid={`${testId}-preview`} className={`${box} object-cover rounded-xl border-2 border-ink`} />
+        )
       ) : (
-        <div className={`${compact ? "h-16 w-24" : "h-40 w-full mb-3"} rounded-xl border-2 border-dashed border-ink/40 bg-ink/5 flex items-center justify-center text-xs font-bold text-ink/50 uppercase`}>
-          Nessuna foto
+        <div className={`${box} rounded-xl border-2 border-dashed border-ink/40 bg-ink/5 flex items-center justify-center text-xs font-bold text-ink/50 uppercase`}>
+          {video ? "Nessun video" : "Nessuna foto"}
         </div>
       )}
-      <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={pick} data-testid={`${testId}-input`} />
+      <input ref={ref} type="file" accept={video ? "video/mp4,video/webm,video/quicktime" : "image/jpeg,image/png,image/webp"} className="hidden" onChange={pick} data-testid={`${testId}-input`} />
       <button
         type="button"
         disabled={busy}

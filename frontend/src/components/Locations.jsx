@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { WarmBackdrop } from "./WarmBackdrop";
 import { MapPin, Phone, Clock, Mail, Navigation, Truck } from "lucide-react";
 import { KineticLines } from "./Kinetic";
 import { locations, foodTruck } from "../locations";
@@ -6,8 +7,9 @@ import { imgUrl } from "../lib/img";
 
 export const Locations = ({ t, lang, images = {} }) => {
   return (
-    <section id="sedi" data-testid="locations-section" className="py-24 sm:py-32 bg-cream overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
+    <section id="sedi" data-testid="locations-section" className="relative py-24 sm:py-32 bg-cream overflow-hidden">
+      <WarmBackdrop images={images} />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8">
         <span className="text-coral font-bold uppercase tracking-widest text-sm">{t.locations.kicker}</span>
         <KineticLines
           lines={t.locations.titleLines}

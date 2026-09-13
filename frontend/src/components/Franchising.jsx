@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WarmBackdrop } from "./WarmBackdrop";
 import { motion } from "framer-motion";
 import { Check, Send } from "lucide-react";
 import axios from "axios";
@@ -8,7 +9,7 @@ import { Textarea } from "./ui/textarea";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export const Franchising = ({ t }) => {
+export const Franchising = ({ t, images }) => {
   const [form, setForm] = useState({ name: "", email: "", phone: "", city: "", message: "" });
   const [sending, setSending] = useState(false);
 
@@ -32,7 +33,8 @@ export const Franchising = ({ t }) => {
     "border-2 border-ink bg-white rounded-xl h-12 font-medium focus-visible:ring-coral focus-visible:ring-offset-0 shadow-hard-sm";
 
   return (
-    <section id="franchising" data-testid="franchising-section" className="bg-ocean grain border-y-2 border-ink py-24 sm:py-32">
+    <section id="franchising" data-testid="franchising-section" className="relative overflow-hidden bg-ocean grain border-y-2 border-ink py-24 sm:py-32">
+      <WarmBackdrop images={images} dark opacity={0.35} />
       <div className="max-w-7xl mx-auto px-4 sm:px-8 grid lg:grid-cols-2 gap-16 items-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WarmBackdrop } from "./WarmBackdrop";
 import { motion } from "framer-motion";
 import { Phone, Mail, Send, ArrowRight } from "lucide-react";
 import axios from "axios";
@@ -10,7 +11,7 @@ import { locations } from "../locations";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-export const Contact = ({ t }) => {
+export const Contact = ({ t, images }) => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
 
@@ -34,8 +35,9 @@ export const Contact = ({ t }) => {
     "border-2 border-ink bg-white rounded-xl h-12 font-medium focus-visible:ring-ocean focus-visible:ring-offset-0 shadow-hard-sm";
 
   return (
-    <section id="contatti" data-testid="contact-section" className="py-24 sm:py-32 bg-cream">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
+    <section id="contatti" data-testid="contact-section" className="relative overflow-hidden py-24 sm:py-32 bg-cream">
+      <WarmBackdrop images={images} />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8">
         <span className="text-ocean font-bold uppercase tracking-widest text-sm">{t.contact.kicker}</span>
         <KineticLines
           lines={t.contact.titleLines}

@@ -7,11 +7,18 @@ import { ImageUpload, uploadImage } from "./ImageUpload";
 import { imgUrl } from "../../lib/img";
 
 const SINGLES = [
-  ["hero", "Foto grande in apertura (Hero)"],
+  ["hero-malaga", "Foto in apertura · Málaga (anteprima del video)"],
+  ["hero-malta", "Foto in apertura · Sliema (anteprima del video)"],
+  ["bg-malaga", "Sfondo caldo sezioni · Málaga"],
+  ["bg-malta", "Sfondo caldo sezioni · Sliema"],
   ["about", "Foto sezione Chi Siamo"],
   ["location-malaga", "Foto sede Málaga"],
   ["location-sliema", "Foto sede Sliema"],
   ["foodtruck", "Foto Food Truck"],
+];
+const VIDEOS = [
+  ["hero-video-malaga", "Video in apertura · Málaga"],
+  ["hero-video-malta", "Video in apertura · Sliema"],
 ];
 
 export const SitePhotos = ({ onUnauthorized }) => {
@@ -63,6 +70,22 @@ export const SitePhotos = ({ onUnauthorized }) => {
             <ImageUpload value={images[key]} onChange={(url) => save(key, url)} testId={`admin-photo-${key}`} label="Cambia foto" />
           </div>
         ))}
+      </div>
+
+      <div className="mt-12">
+        <h3 className="font-display text-4xl text-ink tracking-wide">VIDEO IN APERTURA</h3>
+        <p className="text-ink/60 font-medium">Sostituisce la foto grande "Dal mare al cartoccio" per la sede scelta. MP4 consigliato, max 40 MB, senza audio (parte in muto).</p>
+        <div className="grid sm:grid-cols-2 gap-6 mt-6">
+          {VIDEOS.map(([key, label]) => (
+            <div key={key} data-testid={`admin-photo-card-${key}`} className="bg-white border-2 border-ink rounded-2xl p-4 shadow-hard-sm">
+              <p className="font-bold text-ink mb-3">{label}</p>
+              <ImageUpload video value={images[key]} onChange={(url) => save(key, url)} testId={`admin-photo-${key}`} label="Carica video" />
+              {images[key] && (
+                <button onClick={() => save(key, "")} data-testid={`admin-photo-${key}-remove`} className="mt-3 text-xs font-bold uppercase tracking-wide text-coral hover:underline">Rimuovi video (torna alla foto)</button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="mt-12 flex flex-wrap items-center justify-between gap-4">

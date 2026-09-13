@@ -28,8 +28,9 @@ import Admin from "@/components/Admin";
 import ReviewsPage from "@/components/ReviewsPage";
 
 function Landing() {
-  const { t, lang } = useSite();
+  const { t, lang, site } = useSite();
   const [images, setImages] = useState({});
+  const heroVideo = images[`hero-video-${site}`] || "";
 
   useEffect(() => {
     const lenis = new Lenis({ autoRaf: true });
@@ -45,15 +46,15 @@ function Landing() {
     <div className="App font-body bg-cream text-ink pb-16 lg:pb-0">
       <Navbar />
       <main>
-        <Hero t={t} image={images.hero} />
+        <Hero t={t} image={images[`hero-${site}`] || images.hero} video={heroVideo} />
         <Ticker t={t} />
-        <About t={t} image={images.about} />
+        <About t={t} image={images.about} images={images} />
         <MenuSection t={t} lang={lang} />
         <Locations t={t} lang={lang} images={images} />
         <Gallery t={t} images={images.gallery} />
         <Reviews t={t} />
-        <Franchising t={t} />
-        <Contact t={t} />
+        <Franchising t={t} images={images} />
+        <Contact t={t} images={images} />
       </main>
       <Footer t={t} />
     </div>

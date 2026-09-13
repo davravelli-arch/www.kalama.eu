@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
+import { WarmBackdrop } from "./WarmBackdrop";
 import { KineticLines } from "./Kinetic";
 import { imgUrl } from "../lib/img";
 
 const DEFAULT_IMG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-3-7495723.jpg";
 
-export const About = ({ t, image }) => {
+export const About = ({ t, image, images }) => {
   return (
-    <section id="chi-siamo" data-testid="about-section" className="py-24 sm:py-32 bg-cream overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
+    <section id="chi-siamo" data-testid="about-section" className="relative py-24 sm:py-32 bg-cream overflow-hidden">
+      <WarmBackdrop images={images} />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8">
         <div className="grid lg:grid-cols-12 gap-14 items-center mb-20">
           <div className="lg:col-span-7">
             <span className="text-coral font-bold uppercase tracking-widest text-sm">{t.about.kicker}</span>

@@ -7,7 +7,7 @@ const EASE = [0.22, 1, 0.36, 1];
 
 const DEFAULT_IMG = "https://images.myguide-cdn.com/malaga/companies/kalama-malaga-seafood-bar/large/kalama-malaga-seafood-bar-1-7495721.jpg";
 
-export const Hero = ({ t, image }) => {
+export const Hero = ({ t, image, video }) => {
   const { site } = useSite();
   const loc = siteLocation(site);
   const delivery = loc.actions.find((a) => a.kind === "order") || loc.actions[0];
@@ -17,13 +17,29 @@ export const Hero = ({ t, image }) => {
 
   return (
     <section id="top" data-testid="hero-section" className="relative min-h-[100svh] flex items-end overflow-hidden">
-      <motion.img
-        style={{ y }}
-        src={imgUrl(image) || DEFAULT_IMG}
-        data-testid="hero-image"
-        alt="Kalamà calamari fritti"
-        className="absolute inset-0 w-full h-[115%] object-cover"
-      />
+      {video ? (
+        <motion.video
+          key={video}
+          style={{ y }}
+          src={imgUrl(video)}
+          poster={imgUrl(image) || DEFAULT_IMG}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          data-testid="hero-video"
+          className="absolute inset-0 w-full h-[115%] object-cover"
+        />
+      ) : (
+        <motion.img
+          style={{ y }}
+          src={imgUrl(image) || DEFAULT_IMG}
+          data-testid="hero-image"
+          alt="Kalamà calamari fritti"
+          className="absolute inset-0 w-full h-[115%] object-cover"
+        />
+      )}
       <div className="absolute inset-0 bg-ink/55" />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 pb-24 pt-44">
