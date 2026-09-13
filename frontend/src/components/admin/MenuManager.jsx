@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, ImageOff } from "lucide-react";
+import { Plus, Pencil, Trash2, ImageOff, Copy } from "lucide-react";
 import { API, authHeaders, btnPrimary } from "./ui";
 import { ItemForm } from "./ItemForm";
 import { imgUrl, ALL_CATEGORIES, LOCATIONS } from "../../lib/img";
@@ -59,6 +59,16 @@ export const MenuManager = ({ onUnauthorized }) => {
     }
   };
 
+  const copyImages = async () => {
+    const source = loc === "malta" ? "malaga" : "malta";
+    if (!window.confirm(`Copiare le foto dei piatti da ${LOC_LABEL[source]} a ${LOC_LABEL[loc]} (stessi piatti)?`)) return;
+    try {
+      const { data } = await axios.post(`${API}/admin/menu/copy-images`, null, { ...authHeaders(), params: { source, target: loc } });
+      toast.success(`${data.copied} foto copiate`);
+      load();
+    } catch { toast.error("Copia non riuscita"); }
+  };
+
   const visible = items.filter((i) => (i.location || "malaga") === loc);
   const cats = ALL_CATEGORIES.filter((c) => visible.some((i) => i.category === c));
 
@@ -69,9 +79,14 @@ export const MenuManager = ({ onUnauthorized }) => {
           <h2 className="font-display text-5xl text-ink tracking-wide">GESTIONE MENU</h2>
           <p className="text-ink/60 font-medium mt-1">{visible.length} voci · le modifiche sono subito visibili sul sito</p>
         </div>
-        <button onClick={startNew} data-testid="admin-add-item-btn" className={btnPrimary}>
-          <Plus className="w-5 h-5" strokeWidth={3} /> Nuova voce
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={copyImages} data-testid="admin-copy-images-btn" className="inline-flex items-center gap-2 bg-white text-ink border-2 border-ink rounded-full px-5 py-3 font-bold uppercase tracking-wide text-sm shadow-hard-sm btn-lift">
+            <Copy className="w-4 h-4" /> Copia foto da {loc === "malta" ? "Málaga" : "Sliema"}
+          </button>
+          <button onClick={startNew} data-testid="admin-add-item-btn" className={btnPrimary}>
+            <Plus className="w-5 h-5" strokeWidth={3} /> Nuova voce
+          </button>
+        </div>
       </div>
 
       <div data-testid="admin-location-tabs" className="inline-flex mt-6 border-2 border-ink rounded-full bg-white p-1 shadow-hard-sm">

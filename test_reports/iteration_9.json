@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 9: eseguito security audit su rate limit e header di sicurezza. Header di sicurezza OK (X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, X-Frame-Options SAMEORIGIN, Permissions-Policy). Regressione OK (menu 104 voci, reviews, site-images, admin login, admin/table-requests). Rate limit chat e contact NON funzionano dietro l'ingress Kubernetes: 21 chat consecutive tutte 200 (attese 20+1×429), 4 contact consecutive tutte 200 (attese 3+1×429). RCA: client_ip() usa request.client.host che dietro l'ingress restituisce l'IP del pod ingress-controller. Nei log si vedono 2 IP alternati (10.227.17.194 e 10.227.27.66) per la stessa sessione utente → il bucket viene diviso su più IP e il limite non scatta mai. Franchising single-shot OK 200, table-requests body invalido OK 422. Cleanup Mongo eseguito (chat_messages 21 + messages 5 rimossi, nessun contact/franchising residuo con name 'QA RateLimit Test').",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "/api/chat, /api/contact, /api/franchising, /api/table-requests", "issue": "Rate limit inefficace dietro K8s ingress: client_ip() ritorna request.client.host (IP del pod ingress-controller, non del client reale). I log mostrano che le richieste dello stesso utente arrivano al backend alternate su almeno 2 IP (10.227.17.194 e 10.227.27.66), quindi ogni bucket rimane sotto soglia. Osservato: 21/21 POST /api/chat = 200 (atteso 21° = 429); 4/4 POST /api/contact = 200 (atteso 4° = 429). FIX: leggere X-Forwarded-For (primo IP) o X-Real-IP prima di fallback su request.client.host.", "priority": "CRITICAL"}
+    ],
+    "minor": [
+      {"endpoint": "/api/menu", "issue": "Ritorna 104 voci, mentre la review-request cita 105 (già segnalato in iterazione 8)."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_rate_limits_v9.py",
+    "/app/test_reports/pytest/rate_limits_v9.xml"
+  ],
+  "action_items": [
+    "CRITICO: correggere client_ip() in /app/backend/server.py per usare l'header X-Forwarded-For (primo IP nella lista) o X-Real-IP, altrimenti tutti i rate limit sono di fatto disattivati in produzione. Esempio: `xff = request.headers.get('x-forwarded-for'); return xff.split(',')[0].strip() if xff else (request.client.host if request.client else 'unknown')`.",
+    "Dopo il fix, rieseguire test_rate_limits_v9.py per validare 20+1 su chat e 3+1 su contact."
+  ],
+  "critical_code_review_comments": [
+    "rate_limit() e global_cap() sono in-memory per singolo worker (uvicorn --workers 1 attualmente OK, ma fragile se in futuro si scala): documentare o migrare a Redis/Mongo.",
+    "HTTPException(429) include Retry-After ma il valore è la finestra intera (86400 per il cap giornaliero): considerare tempo residuo effettivo.",
+    "Nessun rate limit su /api/admin/login (già presente lockout brute-force separato, ok).",
+    "server.py ha 852 righe: valutare split in moduli (routes/rate/security)."
+  ],
+  "updated_files": ["/app/backend/tests/test_rate_limits_v9.py"],
+  "success_rate": {"backend": "78% (7/9 pytest)"},
+  "test_credentials": "admin password letta da /app/memory/test_credentials.md (KalamaMare2026!)",
+  "seed_data_creation": "Nessuna. Dati di test creati durante l'esecuzione (21 chat_messages sessione qa-ratelimit-0001 + 4 contact + 1 franchising con name 'QA RateLimit Test') tutti rimossi post-test.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Il rate limit funzionerà solo dopo che client_ip() userà X-Forwarded-For. Attenzione: essendo in-memory, riavviare backend prima di ritestare per azzerare i bucket. Sequenze chat e contact vanno eseguite rapidamente senza modificare file (l'hot reload azzera i contatori).",
+  "rca of the issue": "In backend/server.py:251 la funzione client_ip() ritorna request.client.host, che dietro il proxy K8s è l'IP del pod ingress-controller. In produzione i pod ingress possono essere >=2 e bilanciano round-robin: i log confermano che dallo stesso client di test le richieste arrivano al backend con 2 IP alternati (10.227.17.194 e 10.227.27.66). RATE_BUCKETS usa la chiave `{scope}:{window}:{ip}` quindi ogni pod ingress ha il proprio bucket → il limite reale è N × soglia. Riproduzione: 21 POST /api/chat consecutive dallo stesso client → tutte 200. Mitigazione: leggere X-Forwarded-For (primo elemento) o X-Real-IP come sorgente dell'IP client."
+}

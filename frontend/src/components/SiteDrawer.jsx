@@ -1,7 +1,8 @@
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MapPin, CalendarDays, Phone, Instagram } from "lucide-react";
+import { X, MapPin, CalendarDays, Phone } from "lucide-react";
+import { InstagramIcon, FacebookIcon } from "./SocialIcons";
 import { Logo } from "./Logo";
 import { useSite, siteLocation } from "../lib/site";
 import { socials } from "../locations";
@@ -53,9 +54,10 @@ export const SiteDrawer = ({ open, onClose, links }) => {
               <a href={loc.mapsUrl} target="_blank" rel="noreferrer" data-testid="drawer-directions" className="inline-flex items-center justify-center gap-2 bg-white text-ink border-2 border-ink rounded-full px-6 py-3 font-bold uppercase tracking-wide shadow-hard-sm btn-lift">
                 <MapPin className="w-5 h-5" /> {t.site.directions}
               </a>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="grid grid-cols-4 gap-2 mt-2">
                 <a href={`https://wa.me/${loc.whatsapp}`} target="_blank" rel="noreferrer" data-testid="drawer-whatsapp" className="flex flex-col items-center gap-1 border-2 border-ink rounded-2xl py-3 bg-[#25D366] text-white text-[11px] font-bold uppercase btn-lift"><WaIcon className="w-6 h-6" />WhatsApp</a>
-                <a href={socials.instagram} target="_blank" rel="noreferrer" data-testid="drawer-instagram" className="flex flex-col items-center gap-1 border-2 border-ink rounded-2xl py-3 bg-white text-ink text-[11px] font-bold uppercase btn-lift"><Instagram className="w-6 h-6" />Instagram</a>
+                <a href={socials.instagram} target="_blank" rel="noreferrer" data-testid="drawer-instagram" className="flex flex-col items-center gap-1 border-2 border-ink rounded-2xl py-3 bg-white text-ink text-[11px] font-bold uppercase btn-lift"><InstagramIcon className="w-6 h-6" />Instagram</a>
+                <a href={socials.facebook} target="_blank" rel="noreferrer" data-testid="drawer-facebook" className="flex flex-col items-center gap-1 border-2 border-ink rounded-2xl py-3 bg-white text-ink text-[11px] font-bold uppercase btn-lift"><FacebookIcon className="w-6 h-6" />Facebook</a>
                 <a href={loc.phoneHref} data-testid="drawer-call" className="flex flex-col items-center gap-1 border-2 border-ink rounded-2xl py-3 bg-ocean text-white text-[11px] font-bold uppercase btn-lift"><Phone className="w-6 h-6" />{t.site.call}</a>
               </div>
             </div>

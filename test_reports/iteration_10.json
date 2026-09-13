@@ -1,0 +1,33 @@
+{
+  "summary": "Iteration 10: verificate le 3 modifiche recenti (rate limit con X-Real-IP, icone social colorate, copia foto Málaga→Sliema). Backend 6/6 pytest OK: 20×200+1×429 su POST /api/chat con session-id qa-rl-session-0002; 3×200+1×429 su POST /api/contact; POST /api/admin/menu/copy-images 401 senza token, 422 con source==target, 200 {copied:0} da malaga a malta (già copiate in run precedente); GET /api/menu conferma malta-calamari-piccoli, malta-melanzane-classica, malta-fish-chips con image identica alla controparte malaga-*. Frontend OK: footer-instagram/footer-facebook contengono <svg> con radialGradient IG e fill #1877F2 FB; drawer mobile mostra drawer-instagram e drawer-facebook (svg); admin → Menu → tab Malta·Sliema mostra [data-testid=admin-copy-images-btn] con testo esatto 'Copia foto da Málaga' e cliccando (dialog accept) appare toast '0 foto copiate'; menu pubblico Malta espone card [data-testid=menu-item-malta-calamari-piccoli] con <img src=/api/files/…>. Cleanup Mongo eseguito: 20 chat_messages sessione qa-rl-session-0002 e 3 messages 'QA RateLimit Test' rimossi.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Menu pubblico Malta (Landing)", "issues": ["Alcune card (es. melanzane classica, tartare, insalata teriyaki) mostrano placeholder giallo invece della foto: l'immagine è impostata a livello DB ma renderizzata solo su hover/lazy load — verificare eager loading su prime card visibili."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter10.py",
+    "/app/test_reports/pytest/iter10.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "client_ip() ora prende X-Real-IP → ultimo XFF → client.host: OK per ingress K8s che imposta X-Real-IP; ottimo. Considerare comunque una safety fallback se X-Real-IP contiene lista.",
+    "rate_limit(chat) applicato due volte (per ip e per session_id): funziona ma raddoppia le insert in RATE_BUCKETS. OK.",
+    "copy_menu_images usa IMAGE_ALIASES: buon fallback; nessun cap sul numero di update — accettabile visto require_admin.",
+    "server.py 880 righe: come già segnalato, valutare split in moduli."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter10.py"],
+  "success_rate": {"backend": "100% (6/6)", "frontend": "100% (test critici passati)"},
+  "test_credentials": "admin password KalamaMare2026! da /app/memory/test_credentials.md",
+  "seed_data_creation": "Nessuna. Dati di test (20 chat qa-rl-session-0002 + 3 contact QA RateLimit Test) creati durante il run e rimossi in cleanup.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Rate limit ora funziona correttamente dietro ingress K8s (client_ip legge X-Real-IP). I test devono essere eseguiti rapidamente senza toccare file (hot reload azzera i bucket in-memory). Per aggirare la condivisione dell'IP ingress usare header X-Real-IP:<ip finto> nei test. copy-images è idempotente: seconda esecuzione ritorna {copied: 0}.",
+  "rca of the issue": "N/A - la fix di iterazione 9 (client_ip via X-Real-IP) è confermata funzionante."
+}

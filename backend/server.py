@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 import asyncio
 from typing import Optional, Union
 import uuid
+import time
 from menu_data import MENU_SEED, MENU_VERSION
 from booking import SITES, TableRequestIn, TableRequest, StatusUpdate, ChatIn, request_rows, whatsapp_url, time_slots, build_system_prompt, guest_email, reminder_email
 from zoneinfo import ZoneInfo
@@ -177,7 +178,9 @@ async def get_menu():
 
 
 @api_router.post("/contact")
-async def create_contact(msg: ContactMessage):
+async def create_contact(msg: ContactMessage, request: Request):
+    rate_limit(request, "contact")
+    global_cap("email")
     doc = msg.model_dump()
     doc.update({"id": str(uuid.uuid4()), "type": "contact",
                 "created_at": datetime.now(timezone.utc).isoformat()})
@@ -188,7 +191,9 @@ async def create_contact(msg: ContactMessage):
 
 
 @api_router.post("/franchising")
-async def create_franchise(inq: FranchiseInquiry):
+async def create_franchise(inq: FranchiseInquiry, request: Request):
+    rate_limit(request, "franchising")
+    global_cap("email")
     doc = inq.model_dump()
     doc.update({"id": str(uuid.uuid4()), "type": "franchising",
                 "created_at": datetime.now(timezone.utc).isoformat()})
@@ -232,6 +237,52 @@ def create_admin_token() -> str:
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
+RATE_BUCKETS: dict[str, list[float]] = {}
+DAILY_CAPS: dict[str, tuple[str, int]] = {}
+RATE_RULES = {
+    "chat": [(20, 600), (60, 86400)],
+    "contact": [(3, 3600), (10, 86400)],
+    "franchising": [(3, 3600), (10, 86400)],
+    "table": [(3, 3600), (8, 86400)],
+}
+GLOBAL_DAILY = {"chat": 1500, "email": 400}
+
+
+def client_ip(request: Request) -> str:
+    real = request.headers.get("x-real-ip")
+    if real:
+        return real.strip()
+    fwd = request.headers.get("x-forwarded-for")
+    if fwd:
+        return fwd.split(",")[-1].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def rate_limit(request: Request, scope: str, extra_key: str = ""):
+    ip = client_ip(request) + (f"|{extra_key}" if extra_key else "")
+    now = time.time()
+    for limit, window in RATE_RULES[scope]:
+        key = f"{scope}:{window}:{ip}"
+        hits = [t for t in RATE_BUCKETS.get(key, []) if now - t < window]
+        if len(hits) >= limit:
+            raise HTTPException(status_code=429, detail="Troppe richieste: riprova più tardi", headers={"Retry-After": str(window)})
+        hits.append(now)
+        RATE_BUCKETS[key] = hits
+    if len(RATE_BUCKETS) > 20000:
+        for k in [k for k, v in RATE_BUCKETS.items() if not v or now - v[-1] > 86400]:
+            RATE_BUCKETS.pop(k, None)
+
+
+def global_cap(scope: str):
+    today = datetime.now(timezone.utc).date().isoformat()
+    day, count = DAILY_CAPS.get(scope, (today, 0))
+    if day != today:
+        day, count = today, 0
+    if count >= GLOBAL_DAILY[scope]:
+        raise HTTPException(status_code=429, detail="Servizio momentaneamente saturo: riprova domani o scrivici su WhatsApp")
+    DAILY_CAPS[scope] = (day, count + 1)
+
+
 def require_admin(request: Request):
     auth = request.headers.get("Authorization", "")
     token = auth[7:] if auth.startswith("Bearer ") else None
@@ -249,7 +300,7 @@ def require_admin(request: Request):
 
 @api_router.post("/admin/login")
 async def admin_login(body: AdminLogin, request: Request):
-    ip = request.client.host if request.client else "unknown"
+    ip = client_ip(request)
     key = f"admin:{ip}"
     attempt = await db.login_attempts.find_one({"_id": key})
     if attempt:
@@ -605,6 +656,27 @@ async def search_google_places(body: PlaceSearch, request: Request):
     return [{"id": p["id"], "name": (p.get("displayName") or {}).get("text"), "address": p.get("formattedAddress")} for p in resp.json().get("places", [])]
 
 
+IMAGE_ALIASES = {"melanzane-pesce": "melanzane-acciughe", "great-mix": "gran-fritto", "neonata-cakes": "crocchette",
+                 "fish-balls": "crocchette", "pesce-spada": "salmone", "tonno": "orata"}
+
+
+@api_router.post("/admin/menu/copy-images")
+async def copy_menu_images(request: Request, source: str = "malaga", target: str = "malta"):
+    require_admin(request)
+    if source not in SITES or target not in SITES or source == target:
+        raise HTTPException(status_code=422, detail="Sedi non valide")
+    items = await db.menu_items.find({}, {"_id": 0, "id": 1, "location": 1, "image": 1}).to_list(400)
+    src_map = {i["id"][len(source) + 1:]: i for i in items if i["location"] == source}
+    copied = 0
+    for it in (i for i in items if i["location"] == target):
+        key = it["id"][len(target) + 1:]
+        src = src_map.get(key) or src_map.get(IMAGE_ALIASES.get(key, ""))
+        if src and src.get("image") and src["image"] != it.get("image"):
+            await db.menu_items.update_one({"id": it["id"]}, {"$set": {"image": src["image"]}})
+            copied += 1
+    return {"copied": copied}
+
+
 # --- Table requests ---
 @api_router.get("/table-requests/slots")
 async def get_slots(site: str, date: str):
@@ -617,7 +689,9 @@ async def get_slots(site: str, date: str):
 
 
 @api_router.post("/table-requests")
-async def create_table_request(body: TableRequestIn):
+async def create_table_request(body: TableRequestIn, request: Request):
+    rate_limit(request, "table")
+    global_cap("email")
     req = TableRequest(**body.model_dump())
     await db.table_requests.insert_one(req.model_dump())
     site = SITES[req.site]
@@ -727,7 +801,10 @@ CHAT_HISTORY_LIMIT = 16
 
 
 @api_router.post("/chat")
-async def chat(body: ChatIn):
+async def chat(body: ChatIn, request: Request):
+    rate_limit(request, "chat")
+    rate_limit(request, "chat", extra_key=body.session_id)
+    global_cap("chat")
     if body.site not in SITES:
         raise HTTPException(status_code=422, detail="Sede non valida")
     if not EMERGENT_KEY:
@@ -781,6 +858,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    return response
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

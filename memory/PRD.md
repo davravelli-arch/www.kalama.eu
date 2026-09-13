@@ -72,3 +72,12 @@ Sito web colorato e vivace per "Kalamà", seafood fast food / takeaway / ristora
 - Job asyncio in background (ogni 15 min, avviato allo startup) invia alle richieste `confirmed` con data = oggi (Europe/Madrid) e ora locale >= 9 un'email promemoria nella lingua del cliente (template `REMINDER` in booking.py) con indirizzo/mappa e WhatsApp; salva `reminder_sent_at` (idempotente). Endpoint admin: `POST /admin/table-requests/run-reminders` e `POST /admin/table-requests/{id}/remind` (409 se non confermata). Pulsante "Promemoria" + badge "Promemoria inviato" nel tab Prenotazioni.
 - Test: iteration_7 → 7 backend + E2E admin verdi (ramo <9 verificato per il job).
 - Ancora in attesa dell'utente: testi recensioni, chiave Google Places, foto reali sedi.
+
+## Aggiornamento 13/06/2026 — Lingua nel gate, video hero, sfondi caldi, sicurezza, social, foto Sliema
+- Selettore lingua nella schermata "Dove sei?"; titolo hero senza punti (6 lingue).
+- Video in apertura per sede: chiavi site-images `hero-video-malaga|malta` (upload video mp4/webm/mov max 40MB via stesso endpoint, path kalama/videos/), `/api/files` supporta Range (206) per Safari; poster = `hero-{site}`. Video Malta caricato dal cliente e attivo. Nota: Chromium headless non riproduce H.264 (verificato con WebM).
+- Sfondi caldi generati (Gemini image): Málaga = Plaza de la Marina/porto (variante "prima"), Sliema = lungomare golden hour. Chiavi `location-*`, `hero-*`, `bg-*`; componente `WarmBackdrop` dietro Chi Siamo/Sedi/Franchising/Contatti. Foto About = cartoccio calamari (richiesta cliente).
+- Security audit (read-only): nessun Critical/High. Fix applicati: rate limit in memoria per IP reale (X-Real-IP/XFF) + per session_id chat (chat 20/10min, 60/g; contact/franchising 3/h, 10/g; table 3/h, 8/g; cap globali 1500 chat, 400 email/g) → 429; header di sicurezza; lockout login ora usa client_ip(). Verificato iteration_9 (fail per IP ingress) → iteration_10 (pass).
+- Icone Instagram/Facebook con colori originali (`SocialIcons.jsx`) in footer e drawer. Foto piatti copiate Málaga→Sliema (18) + endpoint `POST /api/admin/menu/copy-images` e bottone admin.
+- Test: iteration_8 e iteration_10 verdi.
+- In attesa utente: chiave Google Places, testi recensioni, foto piatti mancanti (tartare, teriyaki tuna salad).

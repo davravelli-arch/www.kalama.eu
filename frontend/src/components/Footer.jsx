@@ -1,4 +1,5 @@
-import { Instagram, Facebook, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
+import { InstagramIcon, FacebookIcon } from "./SocialIcons";
 import { socials, locations } from "../locations";
 import { Logo } from "./Logo";
 
@@ -20,11 +21,11 @@ export const Footer = ({ t }) => {
             ))}
             <div className="flex items-center gap-4">
               <span className="text-cream/60 text-xs font-bold uppercase tracking-widest">{t.footer.follow}</span>
-              <a href={socials.instagram} target="_blank" rel="noreferrer" data-testid="footer-instagram" className="bg-lemon border-2 border-cream rounded-full p-2.5 btn-lift">
-                <Instagram className="w-5 h-5 text-ink" />
+              <a href={socials.instagram} target="_blank" rel="noreferrer" data-testid="footer-instagram" className="bg-white border-2 border-cream rounded-full p-2 btn-lift">
+                <InstagramIcon className="w-6 h-6" />
               </a>
-              <a href={socials.facebook} target="_blank" rel="noreferrer" data-testid="footer-facebook" className="bg-lemon border-2 border-cream rounded-full p-2.5 btn-lift">
-                <Facebook className="w-5 h-5 text-ink" />
+              <a href={socials.facebook} target="_blank" rel="noreferrer" data-testid="footer-facebook" className="bg-white border-2 border-cream rounded-full p-2 btn-lift">
+                <FacebookIcon className="w-6 h-6" />
               </a>
             </div>
           </div>
