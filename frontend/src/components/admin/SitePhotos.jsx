@@ -13,6 +13,7 @@ const SINGLES = [
   ["bg-malta", "Sfondo caldo sezioni · Sliema"],
   ["bg-gallery", "Sfondo mare · Galleria"],
   ["bg-reviews", "Sfondo · Dicono di noi"],
+  ["bg-contact", "Sfondo · Passa a trovarci (Contatti)"],
   ["about", "Foto sezione Chi Siamo"],
   ["location-malaga", "Foto sede Málaga"],
   ["location-sliema", "Foto sede Sliema"],

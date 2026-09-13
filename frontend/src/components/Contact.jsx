@@ -36,7 +36,7 @@ export const Contact = ({ t, images }) => {
 
   return (
     <section id="contatti" data-testid="contact-section" className="relative overflow-hidden py-24 sm:py-32 bg-cream">
-      <WarmBackdrop images={images} />
+      <WarmBackdrop images={images} srcKey="bg-contact" opacity={images["bg-contact"] ? 0.9 : 0.22} overlay={images["bg-contact"] ? "bg-gradient-to-b from-cream/85 via-cream/40 to-cream/85" : undefined} />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8">
         <span className="text-ocean font-bold uppercase tracking-widest text-sm">{t.contact.kicker}</span>
         <KineticLines
