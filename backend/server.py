@@ -357,11 +357,9 @@ async def admin_delete_menu(item_id: str, request: Request):
 
 @app.on_event("startup")
 async def seed_menu():
-    meta = await db.meta.find_one({"_id": "menu_version"})
-    if await db.menu_items.count_documents({}) == 0 or not meta or meta.get("version") != MENU_VERSION:
-        await db.menu_items.delete_many({})
+    if await db.menu_items.count_documents({}) == 0:
         await db.menu_items.insert_many([dict(i) for i in MENU_SEED])
-        await db.meta.update_one({"_id": "menu_version"}, {"$set": {"version": MENU_VERSION}}, upsert=True)
+    await db.meta.update_one({"_id": "menu_version"}, {"$set": {"version": MENU_VERSION}}, upsert=True)
     try:
         await init_storage()
     except Exception as e:
