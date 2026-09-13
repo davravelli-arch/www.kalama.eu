@@ -50,7 +50,16 @@ export const Navbar = () => {
 
         <nav className="hidden xl:flex items-center gap-5">
           {links.map((l) => (
-            <NavItem key={l.id} l={l} testPrefix="nav-link" className="text-[13px] whitespace-nowrap font-semibold uppercase tracking-wider text-ink hover:text-coral transition-colors" />
+            <NavItem
+              key={l.id}
+              l={l}
+              testPrefix="nav-link"
+              className={
+                l.id === "menu"
+                  ? "whitespace-nowrap font-display text-xl tracking-wide bg-lemon text-ink border-2 border-ink rounded-full px-4 py-1 shadow-hard-sm btn-lift"
+                  : "text-[13px] whitespace-nowrap font-semibold uppercase tracking-wider text-ink hover:text-coral transition-colors"
+              }
+            />
           ))}
         </nav>
 

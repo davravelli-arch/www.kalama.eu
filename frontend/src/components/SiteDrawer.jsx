@@ -31,7 +31,7 @@ export const SiteDrawer = ({ open, onClose, links }) => {
                 l.route ? (
                   <Link key={l.id} to={l.href} onClick={onClose} data-testid={`drawer-link-${l.id}`} className="font-display text-3xl text-ink hover:text-coral transition-colors">{l.label}</Link>
                 ) : (
-                  <a key={l.id} href={l.href} onClick={onClose} data-testid={`drawer-link-${l.id}`} className="font-display text-3xl text-ink hover:text-coral transition-colors">{l.label}</a>
+                  <a key={l.id} href={l.href} onClick={onClose} data-testid={`drawer-link-${l.id}`} className={l.id === "menu" ? "font-display text-4xl text-ink bg-lemon border-2 border-ink rounded-2xl px-4 py-1 shadow-hard-sm inline-block w-fit" : "font-display text-3xl text-ink hover:text-coral transition-colors"}>{l.label}</a>
                 ),
               )}
             </nav>
