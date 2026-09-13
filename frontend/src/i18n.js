@@ -12,7 +12,7 @@ export const translations = {
     },
     hero: {
       badge: "Malaga · Sliema · Buġibba",
-      titles: ["PESCE", "FRESCO.", "VELOCE."],
+      titles: ["PESCE", "FRESCO", "VELOCE"],
       subtitle: "Da Malta a Malaga: panini di mare, pasta fresca e fritti croccanti, pronti in pochi minuti. Anche da asporto.",
       ctaCall: "Chiama e Ritira",
       ctaMenu: "Scopri il Menu",
@@ -136,7 +136,7 @@ export const translations = {
     },
     hero: {
       badge: "Malaga · Sliema · Buġibba",
-      titles: ["FRESH", "FISH.", "FAST."],
+      titles: ["FRESH", "FISH", "FAST"],
       subtitle: "From Malta to Malaga: seafood sandwiches, fresh pasta and crispy fried fish, ready in minutes. Take away too.",
       ctaCall: "Call & Pick Up",
       ctaMenu: "Explore the Menu",
@@ -260,7 +260,7 @@ export const translations = {
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
-      titles: ["PESCADO", "FRESCO.", "RÁPIDO."],
+      titles: ["PESCADO", "FRESCO", "RÁPIDO"],
       subtitle: "De Malta a Málaga: bocadillos de mar, pasta fresca y frituras crujientes, listos en minutos. También para llevar.",
       ctaCall: "Llama y Recoge",
       ctaMenu: "Ver la Carta",
@@ -384,7 +384,7 @@ export const translations = {
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
-      titles: ["FRISCHER", "FISCH.", "SCHNELL."],
+      titles: ["FRISCHER", "FISCH", "SCHNELL"],
       subtitle: "Von Malta bis Málaga: Fisch-Sandwiches, frische Pasta und knusprig Frittiertes, in wenigen Minuten fertig. Auch zum Mitnehmen.",
       ctaCall: "Anrufen & Abholen",
       ctaMenu: "Speisekarte Entdecken",
@@ -508,7 +508,7 @@ export const translations = {
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
-      titles: ["POISSON", "FRAIS.", "RAPIDE."],
+      titles: ["POISSON", "FRAIS", "RAPIDE"],
       subtitle: "De Malte à Málaga : sandwichs de la mer, pâtes fraîches et fritures croustillantes, prêts en quelques minutes. À emporter aussi.",
       ctaCall: "Appeler & Retirer",
       ctaMenu: "Découvrir la Carte",
@@ -632,7 +632,7 @@ export const translations = {
     },
     hero: {
       badge: "Málaga · Sliema · Buġibba",
-      titles: ["PEIXE", "FRESCO.", "RÁPIDO."],
+      titles: ["PEIXE", "FRESCO", "RÁPIDO"],
       subtitle: "De Malta a Málaga: sanduíches de mar, massa fresca e fritos crocantes, prontos em minutos. Também para levar.",
       ctaCall: "Ligar & Levantar",
       ctaMenu: "Ver a Ementa",
