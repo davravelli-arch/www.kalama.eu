@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { MapPin } from "lucide-react";
+import { MapPin, Globe } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 import { Logo } from "./Logo";
 import { useSite } from "../lib/site";
 import { imgUrl } from "../lib/img";
 import { locations } from "../locations";
+
+const LANGS = [["it", "Italiano"], ["en", "English"], ["es", "Español"], ["de", "Deutsch"], ["fr", "Français"], ["pt", "Português"]];
 
 const CARDS = [
   { id: "malaga", city: "Málaga", tagKey: "malagaTag", imgKey: "location-malaga", fallback: locations[0].image },
@@ -13,7 +16,7 @@ const CARDS = [
 ];
 
 export const LocationGate = () => {
-  const { t, setSite } = useSite();
+  const { t, lang, setLang, setSite } = useSite();
   const [images, setImages] = useState({});
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/site-images`).then((r) => setImages(r.data)).catch(() => {});
@@ -27,8 +30,25 @@ export const LocationGate = () => {
       className="fixed inset-0 z-[100] bg-lemon overflow-y-auto"
     >
       <div className="min-h-full flex flex-col items-center justify-center px-4 py-10 sm:py-16">
-        <Logo variant="dark" className="h-12 sm:h-14" testId="gate-logo" />
-        <div className="mt-8 w-full max-w-3xl bg-cream border-2 border-ink rounded-3xl p-6 sm:p-8 shadow-hard">
+        <div className="w-full max-w-3xl flex items-center justify-between gap-4 mb-8">
+          <Logo variant="dark" className="h-12 sm:h-14" testId="gate-logo" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button data-testid="gate-lang-switcher" className="flex items-center gap-2 border-2 border-ink rounded-full px-4 py-2 bg-cream font-bold text-sm uppercase shadow-hard-sm btn-lift">
+                <Globe className="w-5 h-5" />
+                {LANGS.find(([c]) => c === lang)?.[1] || lang}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="border-2 border-ink z-[110]">
+              {LANGS.map(([code, label]) => (
+                <DropdownMenuItem key={code} data-testid={`gate-lang-option-${code}`} onClick={() => setLang(code)} className={`font-semibold cursor-pointer ${lang === code ? "text-coral" : ""}`}>
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="w-full max-w-3xl bg-cream border-2 border-ink rounded-3xl p-6 sm:p-8 shadow-hard">
           <span className="text-ocean font-bold uppercase tracking-widest text-xs sm:text-sm">{t.site.gateKicker}</span>
           <h1 data-testid="gate-title" className="font-display text-4xl sm:text-5xl lg:text-6xl text-ink leading-[0.95] mt-2">{t.site.gateTitle}</h1>
           <p className="text-sm sm:text-base font-medium text-ink/70 mt-3 max-w-xl">{t.site.gateSub}</p>
