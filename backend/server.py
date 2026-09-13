@@ -378,7 +378,7 @@ MAX_UPLOAD = 8 * 1024 * 1024
 MAX_VIDEO_UPLOAD = 40 * 1024 * 1024
 IMAGE_TYPES = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
 VIDEO_TYPES = {"video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov"}
-SITE_IMAGE_KEYS = {"hero", "hero-malaga", "hero-malta", "about", "location-malaga", "location-sliema", "foodtruck", "gallery", "hero-video-malaga", "hero-video-malta", "bg-malaga", "bg-malta", "bg-gallery", "bg-reviews", "bg-contact"}
+SITE_IMAGE_KEYS = {"hero", "hero-malaga", "hero-malta", "about", "location-malaga", "location-sliema", "foodtruck", "gallery", "hero-video-malaga", "hero-video-malta", "bg-malaga", "bg-malta", "bg-gallery", "bg-reviews", "bg-contact", "bg-menu"}
 _storage_key: Optional[str] = None
 
 

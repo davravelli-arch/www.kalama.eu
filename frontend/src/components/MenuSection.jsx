@@ -58,7 +58,7 @@ const DrinkRow = ({ item, t, field }) => (
   </div>
 );
 
-export const MenuSection = ({ t, lang }) => {
+export const MenuSection = ({ t, lang, siteImages = {} }) => {
   const [items, setItems] = useState([]);
   const { site } = useSite();
   const [loc, setLoc] = useState(site || "malaga");
@@ -80,8 +80,14 @@ export const MenuSection = ({ t, lang }) => {
   const switchLoc = (l) => { setLoc(l); setFilter("all"); };
 
   return (
-    <section id="menu" data-testid="menu-section" className="py-24 sm:py-32 bg-white border-y-2 border-ink">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
+    <section id="menu" data-testid="menu-section" className="relative overflow-hidden py-24 sm:py-32 bg-white border-y-2 border-ink">
+      {siteImages["bg-menu"] && (
+        <div aria-hidden="true" data-testid="menu-backdrop" className="absolute inset-0 pointer-events-none">
+          <img src={imgUrl(siteImages["bg-menu"])} alt="" loading="lazy" className="w-full h-full object-cover opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/10 to-white/40" />
+        </div>
+      )}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8">
         <span className="text-ocean font-bold uppercase tracking-widest text-sm">{t.menu.kicker}</span>
         <KineticLines lines={t.menu.titleLines} className="font-display text-5xl sm:text-6xl lg:text-8xl leading-[0.92] mt-4 text-ink" />
         <p className="text-base sm:text-lg text-ink/70 mt-4 font-medium max-w-xl">{t.menu.subtitle}</p>

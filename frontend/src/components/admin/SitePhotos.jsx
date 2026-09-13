@@ -14,6 +14,7 @@ const SINGLES = [
   ["bg-gallery", "Sfondo mare · Galleria"],
   ["bg-reviews", "Sfondo · Dicono di noi"],
   ["bg-contact", "Sfondo · Passa a trovarci (Contatti)"],
+  ["bg-menu", "Sfondo pergamena · Menu"],
   ["about", "Foto sezione Chi Siamo"],
   ["location-malaga", "Foto sede Málaga"],
   ["location-sliema", "Foto sede Sliema"],
