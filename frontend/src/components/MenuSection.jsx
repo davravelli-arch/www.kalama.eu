@@ -75,7 +75,12 @@ export const MenuSection = ({ t, lang, siteImages = {} }) => {
   const visible = filter === "all" ? locItems : locItems.filter((i) => i.category === filter);
   const food = visible.filter((i) => !DRINK_CATEGORIES.includes(i.category));
   const drinkCats = cats.filter((c) => DRINK_CATEGORIES.includes(c) && visible.some((i) => i.category === c));
-  const field = (item, key) => item[`${key}_${lang}`] || item[`${key}_en`];
+  const field = (item, key) => {
+    const value = item[`${key}_${lang}`] || item[`${key}_en`] || "";
+    // A photo URL accidentally saved in a description must never be shown as copy.
+    if (key === "desc" && /^https?:\/\/\S+$/i.test(value.trim())) return "";
+    return value;
+  };
 
   const switchLoc = (l) => { setLoc(l); setFilter("all"); };
 
