@@ -8,6 +8,7 @@ import "@/App.css";
 import { translations } from "@/i18n";
 import { SiteContext, useSite } from "@/lib/site";
 import { applySettings } from "@/lib/settings";
+import { getInitialLanguage } from "@/lib/language";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Ticker } from "@/components/Ticker";
@@ -82,7 +83,7 @@ function PublicShell({ children }) {
 }
 
 function App() {
-  const [lang, setLangState] = useState(() => localStorage.getItem("kalama_lang") || "it");
+  const [lang, setLangState] = useState(getInitialLanguage);
   const [site, setSiteState] = useState(() => localStorage.getItem("kalama_site") || "");
   const [bookingOpen, setBookingOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
