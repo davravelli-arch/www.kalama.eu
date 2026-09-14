@@ -29,6 +29,15 @@ import { Reviews } from "@/components/Reviews";
 import Admin from "@/components/Admin";
 import ReviewsPage from "@/components/ReviewsPage";
 
+const SEO = {
+  it: { title: "Kalamà — Fish Street Food a Málaga e Sliema", description: "Pesce fresco, calamari fritti, panini di mare e pasta a Málaga e Sliema. Scopri menu, orari, delivery e prenotazioni Kalamà." },
+  en: { title: "Kalamà — Fish Street Food in Málaga & Sliema", description: "Fresh fish, fried calamari, seafood sandwiches and pasta in Málaga and Sliema. Explore Kalamà menus, opening hours, delivery and table requests." },
+  es: { title: "Kalamà — Fish Street Food en Málaga y Sliema", description: "Pescado fresco, calamares fritos, bocadillos de mar y pasta en Málaga y Sliema. Consulta menús, horarios, delivery y reservas Kalamà." },
+  de: { title: "Kalamà — Fish Street Food in Málaga und Sliema", description: "Frischer Fisch, frittierte Calamari, Seafood-Sandwiches und Pasta in Málaga und Sliema. Menüs, Öffnungszeiten, Lieferung und Tischanfragen." },
+  fr: { title: "Kalamà — Fish Street Food à Málaga et Sliema", description: "Poisson frais, calamars frits, sandwichs de la mer et pâtes à Málaga et Sliema. Menus, horaires, livraison et demandes de table Kalamà." },
+  pt: { title: "Kalamà — Fish Street Food em Málaga e Sliema", description: "Peixe fresco, lulas fritas, sanduíches do mar e massa em Málaga e Sliema. Menus, horários, entrega e pedidos de mesa Kalamà." },
+};
+
 function Landing() {
   const { t, lang, site } = useSite();
   const [images, setImages] = useState({});
@@ -41,7 +50,6 @@ function Landing() {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/site-images`).then((res) => setImages(res.data)).catch((e) => console.error(e));
-    document.title = "Kalamà — Fish Street Food · Malaga & Malta";
   }, []);
 
   return (
@@ -92,6 +100,15 @@ function App() {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/site-settings`).then((r) => { applySettings(r.data); setSettings(r.data); }).catch(() => setSettings({}));
   }, []);
+
+  useEffect(() => {
+    const seo = SEO[lang] || SEO.en;
+    document.documentElement.lang = lang;
+    document.title = seo.title;
+    document.querySelector('meta[name="description"]')?.setAttribute("content", seo.description);
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", seo.title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content", seo.description);
+  }, [lang]);
 
   const setLang = (l) => { localStorage.setItem("kalama_lang", l); setLangState(l); };
   const setSite = (s) => { localStorage.setItem("kalama_site", s); setSiteState(s); };

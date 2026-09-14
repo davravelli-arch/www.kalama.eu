@@ -10,7 +10,7 @@ from pymongo import MongoClient
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://kalama-web.preview.emergentagent.com').rstrip('/')
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'test_database')
-ADMIN_PASSWORD = 'KalamaMare2026!'
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 mongo = MongoClient(MONGO_URL)
 db = mongo[DB_NAME]

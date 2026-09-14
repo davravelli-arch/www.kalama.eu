@@ -5,7 +5,7 @@ import pytest
 import requests
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
-ADMIN_PASSWORD = "KalamaMare2026!"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 # Use a fake X-Real-IP so we bypass rate-limit sharing with ingress pods
 QA_IP = "203.0.113.77"

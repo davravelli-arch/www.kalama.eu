@@ -5,6 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#FCC617" />
         <meta name="description" content="Kalamà grab & go — the real fish street food. Calamari fritti, panini di mare e specialità fresche a Málaga e Sliema, Malta." />
+        <link rel="canonical" href="https://www.kalama.eu/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Kalamà" />
+        <meta property="og:title" content="Kalamà — Fish Street Food a Málaga e Sliema" />
+        <meta property="og:description" content="Pesce fresco, calamari fritti, panini di mare e pasta a Málaga e Sliema. Scopri menu, orari, delivery e prenotazioni Kalamà." />
+        <meta property="og:url" content="https://www.kalama.eu/" />
+        <meta property="og:image" content="https://www.kalama.eu/brand/mark-yellow-512.png" />
+        <meta name="twitter:card" content="summary" />
         <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/brand/mark-yellow.svg" />
         <link rel="apple-touch-icon" href="%PUBLIC_URL%/brand/mark-yellow-512.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,6 +31,45 @@
         Learn how to configure a non-root public URL by running `npm run build`.
         -->
         <title>Kalamà — Fish Street Food · Málaga & Malta</title>
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Restaurant",
+                "name": "Kalamà Málaga Seafood Bar",
+                "url": "https://www.kalama.eu/",
+                "servesCuisine": ["Seafood", "Italian", "Mediterranean"],
+                "telephone": "+34 610 755 695",
+                "email": "info@kalama.eu",
+                "priceRange": "€€",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "Calle Trinidad Grund 7",
+                  "postalCode": "29001",
+                  "addressLocality": "Málaga",
+                  "addressCountry": "ES"
+                }
+              },
+              {
+                "@type": "Restaurant",
+                "name": "Kalamà Sliema",
+                "url": "https://www.kalama.eu/",
+                "servesCuisine": ["Seafood", "Italian", "Mediterranean"],
+                "telephone": "+356 7990 0819",
+                "email": "kalama.international@gmail.com",
+                "priceRange": "€€",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "111 Triq ix-Xatt",
+                  "postalCode": "SLM 3210",
+                  "addressLocality": "Sliema",
+                  "addressCountry": "MT"
+                }
+              }
+            ]
+          }
+        </script>
         <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
     </head>
@@ -101,14 +148,19 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_DbsPb39SRc8z3EiQ6Dhj6ikv4H4rTKcht9d4sZSesceP", {
-                api_host: "https://ap.emergent.sh",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
-                session_recording: {
-                    recordCrossOriginIframes: true,
-                    capturePerformance: false,
-                },
-            });
+            window.startKalamaAnalytics = function () {
+                if (window.__kalamaAnalyticsStarted) return;
+                window.__kalamaAnalyticsStarted = true;
+                posthog.init("phc_DbsPb39SRc8z3EiQ6Dhj6ikv4H4rTKcht9d4sZSesceP", {
+                    api_host: "https://ap.emergent.sh",
+                    person_profiles: "identified_only",
+                    session_recording: {
+                        recordCrossOriginIframes: true,
+                        capturePerformance: false,
+                    },
+                });
+            };
+            if (localStorage.getItem("kalama_privacy_ok") === "1") window.startKalamaAnalytics();
         </script>
     </body>
 </html>

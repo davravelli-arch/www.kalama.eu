@@ -13,7 +13,7 @@ export const CookieBanner = () => {
       <ShieldCheck className="w-6 h-6 text-ocean shrink-0" />
       <div>
         <p className="text-sm font-medium text-ink/80">{t.cookie.text}</p>
-        <button onClick={() => { localStorage.setItem(KEY, "1"); setOk(true); }} data-testid="cookie-accept" className="mt-3 bg-lemon text-ink border-2 border-ink rounded-full px-4 py-1.5 font-bold text-xs uppercase tracking-wide shadow-hard-sm btn-lift">
+        <button onClick={() => { localStorage.setItem(KEY, "1"); window.startKalamaAnalytics?.(); setOk(true); }} data-testid="cookie-accept" className="mt-3 bg-lemon text-ink border-2 border-ink rounded-full px-4 py-1.5 font-bold text-xs uppercase tracking-wide shadow-hard-sm btn-lift">
           {t.cookie.accept}
         </button>
       </div>

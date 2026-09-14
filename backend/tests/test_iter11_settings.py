@@ -4,7 +4,7 @@ import requests
 import pytest
 
 BASE = os.environ.get("REACT_APP_BACKEND_URL", "https://kalama-web.preview.emergentagent.com").rstrip("/")
-ADMIN_PW = "KalamaMare2026!"
+ADMIN_PW = os.environ.get("ADMIN_PASSWORD", "")
 
 
 @pytest.fixture(scope="module")

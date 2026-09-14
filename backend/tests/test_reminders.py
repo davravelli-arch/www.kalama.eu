@@ -11,7 +11,7 @@ from pymongo import MongoClient
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME = os.environ.get("DB_NAME", "test_database")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "KalamaMare2026!")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 LOCAL_TZ = ZoneInfo("Europe/Madrid")
 

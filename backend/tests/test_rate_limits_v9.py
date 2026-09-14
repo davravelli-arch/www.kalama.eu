@@ -5,7 +5,7 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://kalama-web.preview.emergentagent.com").rstrip("/")
-ADMIN_PWD = "KalamaMare2026!"
+ADMIN_PWD = os.environ.get("ADMIN_PASSWORD", "")
 
 
 # ---------- security headers ----------
